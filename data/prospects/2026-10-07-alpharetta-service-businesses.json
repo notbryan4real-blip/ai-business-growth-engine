@@ -1,0 +1,122 @@
+[
+  {
+    "business_name": "Gagne Heating & Air Conditioning",
+    "category": "HVAC",
+    "location": "Alpharetta, GA",
+    "phone": "(678) 498-1190",
+    "rating": 4.5,
+    "review_count": 45,
+    "website_url": "https://gagneac.com/",
+    "website_status": "verified_official_site",
+    "source": "yelp",
+    "source_url": "https://www.yelp.com/biz/gagne-heating-and-air-conditioning-alpharetta-2"
+  },
+  {
+    "business_name": "Neese Heating & Cooling",
+    "category": "HVAC",
+    "location": "Alpharetta, GA",
+    "phone": "(770) 288-0335",
+    "rating": 3.6,
+    "review_count": 43,
+    "website_url": "https://neesehvac.com/",
+    "website_status": "verified_official_site",
+    "source": "yelp",
+    "source_url": "https://www.yelp.com/biz/neese-jones-heating-and-cooling-alpharetta"
+  },
+  {
+    "business_name": "ClimateSmith",
+    "category": "HVAC",
+    "location": "Alpharetta, GA",
+    "phone": "(770) 475-9555",
+    "rating": 4.8,
+    "review_count": 18,
+    "website_url": "https://www.alpharetta-hvac.com/",
+    "website_status": "verified_official_site",
+    "source": "yelp",
+    "source_url": "https://www.yelp.com/biz/climatesmith-alpharetta"
+  },
+  {
+    "business_name": "Staton Heating & Air",
+    "category": "HVAC",
+    "location": "Alpharetta, GA",
+    "phone": "(770) 691-1387",
+    "rating": 2.4,
+    "review_count": 16,
+    "website_url": "https://www.statonheatingandair.com/",
+    "website_status": "verified_official_site",
+    "source": "yelp",
+    "source_url": "https://www.yelp.com/biz/staton-heating-and-air-alpharetta-2"
+  },
+  {
+    "business_name": "Shiraz plumbing",
+    "category": "Plumbing",
+    "location": "Alpharetta, GA",
+    "phone": "(770) 383-5578",
+    "rating": 4.3,
+    "review_count": 11,
+    "website_url": null,
+    "website_status": "no_dedicated_official_site_found",
+    "source": "yelp",
+    "source_url": "https://www.yelp.com/biz/shiraz-plumbing-alpharetta"
+  },
+  {
+    "business_name": "Jimar Construction Group",
+    "category": "Electricians",
+    "location": "Alpharetta, GA",
+    "phone": "(404) 543-1623",
+    "rating": 3.4,
+    "review_count": 5,
+    "website_url": "http://www.jimargroup.com/",
+    "website_status": "verified_official_site",
+    "source": "yelp",
+    "source_url": "https://www.yelp.com/biz/jimar-construction-group-alpharetta"
+  },
+  {
+    "business_name": "Abba Maintenance and Electrical",
+    "category": "Electricians",
+    "location": "Alpharetta, GA",
+    "phone": "(770) 331-2282",
+    "rating": 5.0,
+    "review_count": 4,
+    "website_url": "https://www.abbamaintenance.com/",
+    "website_status": "verified_official_site",
+    "source": "yelp",
+    "source_url": "https://www.yelp.com/biz/abba-maintenance-and-electrical-alpharetta"
+  },
+  {
+    "business_name": "Air Control Heating and Air",
+    "category": "HVAC",
+    "location": "Roswell, GA",
+    "phone": "(770) 667-5300",
+    "rating": 4.5,
+    "review_count": 17,
+    "website_url": "https://aircontrolgeorgia.com/",
+    "website_status": "verified_official_site",
+    "source": "yelp",
+    "source_url": "https://www.yelp.com/biz/air-control-heating-and-air-roswell"
+  },
+  {
+    "business_name": "Blackstock Electric",
+    "category": "Electricians",
+    "location": "Suwanee, GA",
+    "phone": "(770) 365-5168",
+    "rating": 4.6,
+    "review_count": 9,
+    "website_url": "https://www.blackstockelectricinc.com/",
+    "website_status": "verified_official_site",
+    "source": "yelp",
+    "source_url": "https://www.yelp.com/biz/blackstock-electric-suwanee-4"
+  },
+  {
+    "business_name": "Hansgrohe",
+    "category": "Plumbing",
+    "location": "Alpharetta, GA",
+    "phone": "(770) 360-9818",
+    "rating": 2.1,
+    "review_count": 49,
+    "website_url": "https://www.hansgrohe-usa.com/",
+    "website_status": "verified_official_site",
+    "source": "yelp",
+    "source_url": "https://www.yelp.com/biz/hansgrohe-alpharetta-3"
+  }
+]
