@@ -1,96 +1,83 @@
-# Shiraz Plumbing — Deep Prospect Audit
+# Shiraz Plumbing — Competitive Conversion Audit
 
 **Audit date:** 2026-10-07  
-**Market:** Alpharetta, Georgia  
-**Phone:** (770) 383-5578  
-**Opportunity:** Website replacement + lead-capture/response automation
+**Market:** Alpharetta, GA  
+**Phone:** (770) 383-5578
 
-## Executive assessment
+## What changed after competitive research
 
-Shiraz Plumbing is an unusually strong first prospect because the business appears to have **real local demand and strong customer sentiment but no clearly verified dedicated official website** in the sources reviewed.
+The first demo was intentionally simple. A second pass against current Alpharetta plumbing competitors showed a clearer pattern: the strongest sites sell **speed + trust + a very obvious conversion path**, not just a list of services.
 
-The current business profile returned by local search shows a **5.0/5 rating from 95 reviews** and 24-hour availability. Separate directory research identifies the business in Alpharetta and describes more than 12 years of plumbing experience. These sources are not identical, so ratings/review counts should be rechecked before any customer-facing outreach.
+Competitor examples currently emphasize:
+- prominent click-to-call CTAs
+- request-service forms
+- service-specific navigation
+- emergency/urgent-problem messaging
+- local service-area relevance
+- trust signals such as ratings, licensing/insurance claims, warranties, or upfront pricing
 
-The biggest commercial gap is not "they need a prettier website." It is that a high-intent homeowner searching for a plumber may have to rely on directory listings and a phone call rather than a dedicated conversion path.
+See examples from Benjamin Franklin Plumbing, A&G Plumbing, Torch Plumbing, and other Alpharetta competitors. These are market-positioning references, not claims about Shiraz Plumbing.
 
-## Evidence
+## Shiraz-specific advantage
 
-- Local business search currently lists Shiraz Plumbing in Alpharetta, phone **(770) 383-5578**, with 5.0/95 reviews and 24-hour availability.
-- Yahoo's Alpharetta plumbing directory currently shows Shiraz Plumbing at 4.5/11 reviews and the same phone number.
-- A separate plumbing directory describes 12+ years of local experience and lists plumbing repair, installation/replacement, inspection, gas-line repair, and sump-pump repair.
-- Web searches did not surface a clearly verified dedicated official website for the business. This is the key item to confirm manually before outreach.
-- A local Iranian-business directory also lists Shiraz Plumbing in Alpharetta.
+Current local-business evidence describes Shiraz Plumbing as a highly rated Alpharetta provider with repeated customer themes around:
+- quick response
+- punctual arrival
+- direct communication
+- fair pricing
+- water-heater work
+- leak/fixture repairs
 
-## Current conversion gaps to test
+The current local business result shows **5.0/5 from 95 reviews** and 24-hour availability, while another directory shows 4.5/11 reviews and 8 AM–6 PM daily. Because these sources conflict, the demo deliberately avoids publishing a precise rating or claiming 24/7 availability until the owner confirms the facts.
 
-These are **opportunity hypotheses**, not claims that every item is currently broken:
+## Conversion strategy
 
-1. No verified dedicated website / owned conversion funnel.
-2. No obvious online quote/request workflow surfaced in the research.
-3. Service information is fragmented across third-party listings.
-4. Strong reviews are not being leveraged in a controlled owned-media experience.
-5. Emergency/high-intent visitors have no verified dedicated landing page or prominent conversion path.
-6. No verified automated lead intake, qualification, scheduling, or follow-up flow surfaced.
+### Primary CTA
+**Call (770) 383-5578**
 
-## Recommended first website
+### Secondary CTA
+**Request Service**
 
-### Primary goal
-Turn local search intent into a phone call or quote request in under 30 seconds.
+### Visitor segmentation
+Instead of forcing a visitor to understand plumbing terminology, the hero asks:
+- Water heater problem
+- Leak or burst pipe
+- Clogged drain or toilet
+- Faucet / fixture issue
+- Something else
 
-### Above the fold
-- "Fast, Honest Plumbing Help in Alpharetta"
-- Clear phone CTA
-- Secondary "Request a Quote" CTA
-- Trust strip: local service, experienced plumber, customer-rated
-- Emergency/problem-first messaging
+This is designed to reduce friction and create a natural future handoff to AI lead qualification.
 
-### Core sections
-1. Hero + click-to-call
-2. Services
-   - Leak & pipe repair
-   - Water heaters
-   - Drain/clog problems
-   - Toilets, sinks & faucets
-   - Garbage disposals
-   - Plumbing installation/replacement
-   - Gas-line and sump-pump services (only after owner confirmation)
-3. Why homeowners choose Shiraz Plumbing
-4. Review/testimonial section
-5. Service-area section
-6. Simple quote/request form
-7. FAQ
-8. Final call-to-action
+## AI upsell opportunity
 
-## Automation upsell
+Once the website is approved, the next logical automation is:
 
-After the website sale, the highest-value automation package is:
+**Lead intake → urgency classification → owner notification → missed-call text-back → follow-up**
 
-**AI lead intake + missed-call recovery + follow-up**
+Example:
+1. Visitor submits problem + phone + ZIP.
+2. AI classifies service type and urgency.
+3. Owner receives a concise lead summary.
+4. If a call is missed, an automated text asks for the problem and preferred callback window.
+5. Unanswered quote requests receive a controlled follow-up sequence.
+6. Completed jobs can trigger review requests.
 
-Suggested flow:
-- Website visitor submits problem + ZIP + preferred callback window.
-- AI classifies urgency and service type.
-- Lead is sent to the owner's preferred inbox/CRM.
-- Missed calls trigger an immediate text-back workflow.
-- Unanswered estimates receive structured follow-ups.
-- Completed jobs trigger review-request campaigns.
+No emergency-response SLA, pricing, scheduling availability, licensing claim, warranty, or financing promise should be automated until the owner confirms the policy.
 
-Do not promise 24/7 emergency response or online scheduling until the owner confirms the actual operating process.
+## Sales-demo positioning
 
-## Sales angle
+The pitch should not be "your website is bad."
 
-Do **not** lead with "your website is bad." The stronger pitch is:
+The stronger proposition is:
 
-> You already have the hard part: customers trust you. I found Shiraz Plumbing while researching local service businesses, and I noticed that your online presence doesn't give that trust a dedicated home. I mocked up a simple site designed to turn searches into calls and quote requests.
+> You already have the trust. We built a simple online front door that turns that trust into calls and service requests.
 
-## Confidence
+## Current status
 
-**High confidence:** local business identity, phone number, strong review signal, plumbing category, Alpharetta market.
-
-**Medium confidence:** 12+ years experience and specific service mix because these come from directory/aggregated sources.
-
-**Needs owner verification:** official website absence, exact hours/emergency policy, licensing/insurance claims, service-area boundaries, pricing, warranties, online scheduling, and any claims about 24/7 response.
-
-## Next experiment
-
-Use the included demo as a visual sales asset. Keep it clearly labeled internally as a **concept/demo** until the owner approves branding, service claims, contact workflow, photos, reviews, and legal/business details.
+- Prospect identified
+- Competitive research completed
+- Deep audit completed
+- Conversion strategy defined
+- Demo upgraded
+- Outreach intentionally **not sent**
+- Owner verification still required before publication
