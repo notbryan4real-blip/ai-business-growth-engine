@@ -1,25 +1,28 @@
 # AI Business Growth Engine
 
-AI-powered platform for finding, building websites for, and automating small businesses.
+AI-powered platform for finding, qualifying, building websites for, and automating small businesses.
 
-## Milestone 1 — Prospect Discovery & Qualification
+## Current milestone
 
-Pipeline: discovery → normalization → scoring → qualification → sales queue
+**Milestone 2 — First prospect deep audit + sales demo**
 
-### Structure
-- agents/prospecting — discovery models and provider contracts
-- agents/qualification — deterministic opportunity scoring
-- database — persistence/domain contracts
-- integrations — external provider interfaces
-- tests — automated tests
-- config — configuration
+The first end-to-end prospect experiment is **Shiraz Plumbing in Alpharetta, GA**.
 
-### Principles
+- Prospect research: local-business search + independent web verification
+- Deep audit: `docs/prospects/shiraz-plumbing-audit.md`
+- Sales-demo website: `demos/shiraz-plumbing/index.html`
+- No outreach is sent automatically; human approval remains required before contacting a prospect.
+- Business facts that are not independently verified are explicitly marked as hypotheses or owner-verification items.
+
+## Pipeline
+
+Discovery → normalization → scoring → deep audit → demo site → human review → outreach → close → deploy → automation upsell
+
+## Principles
+
 - Provider-agnostic integrations
 - Deterministic scoring before AI judgment
-- Explainable qualification
+- Evidence-backed qualification
 - Human review before outreach
 - No secrets in source control
-
-## Status
-Milestone 1 foundation initialized.
+- Never present heuristic website scores as audited facts
