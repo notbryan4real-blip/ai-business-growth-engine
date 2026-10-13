@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="A sample mobile detailing website concept. Replace all sample details with client-approved information before use.">
+  <title>Northstar Mobile Detail | Sample Website Concept</title>
+  <style>
+    :root{--ink:#172126;--muted:#53646b;--paper:#f7f8f5;--white:#fff;--accent:#b6f36a;--dark:#10252a;--line:#dfe6e1;--radius:22px}
+    *{box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body{margin:0;background:var(--paper);color:var(--ink);font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;line-height:1.6}
+    a{color:inherit}
+    .concept{padding:9px 16px;background:#fff3c4;color:#594500;text-align:center;font-size:.8rem;font-weight:700}
+    .wrap{width:min(1120px,calc(100% - 36px));margin:auto}
+    header{background:var(--dark);color:white}
+    nav{display:flex;align-items:center;justify-content:space-between;gap:18px;padding:20px 0}
+    .brand{font-weight:850;letter-spacing:-.04em;font-size:1.15rem}
+    .brand span{color:var(--accent)}
+    .navlinks{display:flex;gap:22px;align-items:center;font-size:.9rem}
+    .navlinks a{text-decoration:none}
+    .btn{display:inline-flex;justify-content:center;align-items:center;gap:8px;padding:13px 18px;border-radius:999px;background:var(--accent);color:var(--dark);font-weight:800;text-decoration:none;border:0}
+    .btn.secondary{background:transparent;border:1px solid #60777b;color:white}
+    .hero{display:grid;grid-template-columns:1.05fr .95fr;gap:46px;align-items:center;padding:64px 0 76px}
+    .eyebrow{font-size:.76rem;text-transform:uppercase;letter-spacing:.14em;font-weight:800;color:#51752b}
+    h1,h2,h3,p{margin-top:0}
+    h1{font-size:clamp(2.7rem,6vw,5rem);line-height:.99;letter-spacing:-.065em;margin:12px 0 22px}
+    .hero p{color:#c7d5d3;font-size:1.08rem;max-width:520px}
+    .actions{display:flex;flex-wrap:wrap;gap:12px;margin-top:26px}
+    .hero-card{min-height:350px;border-radius:30px;background:linear-gradient(150deg,#c3f77b,#629c83 55%,#173a3e);padding:24px;display:flex;align-items:end;position:relative;overflow:hidden}
+    .hero-card:before{content:"";position:absolute;width:330px;height:170px;border:22px solid #ffffff55;border-radius:50%;transform:rotate(-23deg);top:46px;left:8%}
+    .car{position:absolute;left:11%;right:8%;top:35%;height:100px;border-radius:70px 90px 26px 28px;background:linear-gradient(160deg,#f8faf7,#aebbb7);box-shadow:0 26px 35px #10252a55}
+    .car:before{content:"";position:absolute;left:24%;top:-44px;width:48%;height:58px;background:#dce7e2;border-radius:70px 70px 0 0;clip-path:polygon(15% 0,85% 0,100% 100%,0 100%)}
+    .wheel{position:absolute;bottom:-20px;width:49px;height:49px;border:10px solid #263439;background:#a9b8b2;border-radius:50%}
+    .wheel.one{left:17%}.wheel.two{right:17%}
+    .hero-note{position:relative;background:#ffffffdf;border-radius:18px;padding:16px 18px;max-width:275px;backdrop-filter:blur(8px)}
+    .hero-note strong{display:block;font-size:1.05rem}.hero-note span{font-size:.85rem;color:var(--muted)}
+    section{padding:72px 0}
+    .section-head{max-width:620px;margin-bottom:30px}
+    h2{font-size:clamp(2rem,4vw,3.15rem);line-height:1.08;letter-spacing:-.05em;margin-bottom:14px}
+    .section-head p,.muted{color:var(--muted)}
+    .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+    .service{background:white;border:1px solid var(--line);border-radius:var(--radius);padding:24px}
+    .icon{display:grid;place-items:center;width:46px;height:46px;border-radius:14px;background:#edf7df;font-size:1.35rem;margin-bottom:22px}
+    .service h3{margin-bottom:8px}
+    .service p{color:var(--muted);font-size:.95rem;margin-bottom:0}
+    .band{background:#eaf1e8}
+    .split{display:grid;grid-template-columns:1fr 1fr;gap:40px;align-items:center}
+    .checklist{list-style:none;padding:0;margin:24px 0}
+    .checklist li{padding:11px 0;border-bottom:1px solid #d1ddd1}
+    .checklist li:before{content:"✓";font-weight:900;color:#527b2b;margin-right:12px}
+    .quote{background:var(--dark);color:white;border-radius:28px;padding:30px}
+    .quote p{color:#c7d5d3}
+    .quote .btn{width:100%;margin-top:12px}
+    .steps{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+    .step-num{font-weight:900;color:#5a7e32;font-size:.8rem;letter-spacing:.12em}
+    .cta{background:var(--dark);color:white;text-align:center;border-radius:30px;padding:48px 24px}
+    .cta p{color:#c7d5d3;max-width:560px;margin:0 auto 24px}
+    footer{padding:28px 0;color:var(--muted);font-size:.85rem}
+    .foot{display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap}
+    @media(max-width:760px){.wrap{width:min(100% - 28px,560px)}.navlinks a:not(.btn){display:none}.hero,.split{grid-template-columns:1fr}.hero{padding:42px 0 52px;gap:28px}.hero-card{min-height:290px}.grid,.steps{grid-template-columns:1fr}.service{padding:22px}section{padding:52px 0}.quote{padding:24px}}
+  </style>
+</head>
+<body>
+  <div class="concept">SAMPLE CONCEPT ONLY — fictional business and details. Not an operating company website.</div>
+  <header>
+    <div class="wrap">
+      <nav aria-label="Main navigation">
+        <div class="brand">NORTHSTAR<span>.</span> DETAIL</div>
+        <div class="navlinks"><a href="#services">Services</a><a href="#process">How it works</a><a class="btn" href="#contact">Request a quote</a></div>
+      </nav>
+      <div class="hero">
+        <div>
+          <div class="eyebrow">Mobile detailing · At your location</div>
+          <h1>A cleaner car.<br>A simpler day.</h1>
+          <p>Professional interior and exterior detailing at your home or workplace. Clear options, careful work, and a finish you’ll feel good about.</p>
+          <div class="actions"><a class="btn" href="#contact">Get a free quote ↗</a><a class="btn secondary" href="#services">Explore services</a></div>
+        </div>
+        <div class="hero-card" aria-label="Stylized illustration of a clean car">
+          <div class="car"><span class="wheel one"></span><span class="wheel two"></span></div>
+          <div class="hero-note"><strong>Care that comes to you.</strong><span>Home · Office · Fleet</span></div>
+        </div>
+      </div>
+    </div>
+  </header>
+  <main>
+    <section id="services">
+      <div class="wrap">
+        <div class="section-head"><div class="eyebrow">Services</div><h2>The right detail for your drive.</h2><p>Choose a starting point. The final recommendation should be based on your vehicle, condition, and goals.</p></div>
+        <div class="grid">
+          <article class="service"><div class="icon">✦</div><h3>Interior refresh</h3><p>Vacuuming, surface cleaning, and attention to the details that make your cabin feel fresh again.</p></article>
+          <article class="service"><div class="icon">◉</div><h3>Exterior detail</h3><p>A careful wash and finish focused on a clean look while respecting your vehicle’s surfaces.</p></article>
+          <article class="service"><div class="icon">✧</div><h3>Paint protection</h3><p>Ask about available protection options for your vehicle, how you use it, and your maintenance goals.</p></article>
+        </div>
+      </div>
+    </section>
+    <section class="band">
+      <div class="wrap split">
+        <div><div class="eyebrow">Made convenient</div><h2>Good care, without the extra trip.</h2><p class="muted">A customer-focused service page should make the next step obvious: understand the options, see what to expect, and request a quote from your phone.</p>
+          <ul class="checklist"><li>Service details that are easy to scan</li><li>Clear quote and contact options</li><li>Mobile-friendly layout</li><li>Space for real photos and approved reviews</li></ul>
+        </div>
+        <aside class="quote"><div class="eyebrow">Simple next step</div><h3>Tell us about your vehicle.</h3><p>Share the vehicle type, service you're interested in, and your preferred location. We'll follow up with the next steps.</p><a class="btn" href="#contact">Request a quote ↗</a></aside>
+      </div>
+    </section>
+    <section id="process">
+      <div class="wrap">
+        <div class="section-head"><div class="eyebrow">How it works</div><h2>Three simple steps.</h2></div>
+        <div class="steps">
+          <div><div class="step-num">STEP 01</div><h3>Choose your service</h3><p class="muted">Tell us what you want to improve and what kind of vehicle you drive.</p></div>
+          <div><div class="step-num">STEP 02</div><h3>Confirm the details</h3><p class="muted">Review the scope, price, location, and timing before booking.</p></div>
+          <div><div class="step-num">STEP 03</div><h3>Enjoy the result</h3><p class="muted">Your detail is completed at the agreed location and time.</p></div>
+        </div>
+      </div>
+    </section>
+    <section id="contact">
+      <div class="wrap">
+        <div class="cta"><div class="eyebrow">Ready when you are</div><h2>Let's get your car looking its best.</h2><p>This sample call to action would connect to the client's approved phone number, email, or booking system after the project is commissioned.</p><a class="btn" href="mailto:hello@example.com?subject=Sample%20detailing%20quote">Sample email action ↗</a></div>
+      </div>
+    </section>
+  </main>
+  <footer><div class="wrap foot"><span>© Northstar Detail — fictional sample concept</span><span>Replace all copy, contact details, pricing, images, and claims with client-approved information.</span></div></footer>
+</body>
+</html>
