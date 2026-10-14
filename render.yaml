@@ -1,0 +1,17 @@
+services:
+  - type: web
+    name: ai-business-growth-engine-api
+    runtime: python
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn app:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /api/health
+    envVars:
+      - key: AI_API_KEY
+        sync: false
+      - key: AI_MODEL
+        value: claude-3-5-haiku-latest
+      - key: CORS_ORIGINS
+        value: https://notbryan4real-blip.github.io
+      - key: GROWTH_ENGINE_DATA_PATH
+        value: data/runtime_store.json
