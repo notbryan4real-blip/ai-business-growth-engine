@@ -1,23 +1,26 @@
-# Growth Engine Dashboard (MVP)
+# Growth Engine Dashboard
 
-A phone-first workspace for the prospect-to-revenue workflow.
+A phone-first command center for the prospect-to-revenue workflow.
 
-## What works
-- Add, edit, search, and rank prospect records using a visible deterministic scoring rubric.
+## Features
+- Add, edit, search, and rank prospects using a transparent scoring rubric.
 - Track opportunities through Research → Demo → Proposal → Won.
-- Generate editable outreach drafts and proposal outlines from your verified observations.
-- Require a manual review confirmation before marking a draft approved for manual use.
-- Record payments actually received separately from estimated pipeline value.
-- Export all locally stored prospects, drafts, and revenue records as a JSON backup.
+- Generate editable outreach drafts and proposal outlines.
+- Review-gate outbound messaging; nothing is sent automatically.
+- Track received payments separately from estimated pipeline value.
+- Export a JSON backup.
+- AI Agent Lab UI for submitting evidence to the protected specialist-agent API and viewing structured run reports.
 
-## Open it
-After the GitHub Pages workflow deploys, the dashboard is intended to be available at:
+## Hosting
+The dashboard is intended to be served from GitHub Pages at:
 
 https://notbryan4real-blip.github.io/ai-business-growth-engine/
 
-The workflow deploys the contents of this folder when files change on main. If GitHub Pages is not enabled for GitHub Actions in repository settings, enable Pages with the GitHub Actions build source once.
+The Pages deployment workflow is committed, but its attempts currently fail because the connected GitHub integration cannot create/enable the Pages site. The repository owner must enable GitHub Pages with the GitHub Actions build source in repository settings, or use another authorized static host.
 
-## Important limits
-This is a usable MVP, not a live autonomous agent service. It does not scrape or verify the web, invoke an LLM, run background jobs, send outreach, accept payments, or sync across devices. Data is stored in the browser's local storage on the device/browser where you use it; export backups regularly. The seeded Shiraz Plumbing record is a carry-over lead that must be re-verified before outreach. Its score reflects the website-status field only and is not a verified current buying signal.
+## AI Agent Lab setup
+The API must be deployed separately using the repository's `render.yaml` blueprint. Configure `AI_API_KEY` with an Anthropic API key and `APP_API_TOKEN` with a long random secret in the hosting environment. Then open the Agent Lab tab and enter the API base URL and token. The API token is held in browser session storage, not persistent local storage. Configure the API's CORS origin to the dashboard's actual public origin.
 
-The underlying Python project remains separate. Do not represent local template-generated drafts as AI-generated research or claim a prospect has been verified unless you actually verified it.
+The agents perform separate sequential model calls to analyze submitted evidence. They do not browse the live web, verify business details, or send outreach. Free hosting may sleep, and the default JSON file storage is not durable across some restarts; use managed persistent storage before relying on it for business-critical records.
+
+The seeded Shiraz Plumbing record is a carry-over lead. Re-verify current business details before outreach.
