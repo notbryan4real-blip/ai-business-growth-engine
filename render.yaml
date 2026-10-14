@@ -9,8 +9,10 @@ services:
     envVars:
       - key: AI_API_KEY
         sync: false
+      - key: APP_API_TOKEN
+        sync: false
       - key: AI_MODEL
-        value: claude-3-5-haiku-latest
+        value: claude-haiku-4-5
       - key: CORS_ORIGINS
         value: https://notbryan4real-blip.github.io
       - key: GROWTH_ENGINE_DATA_PATH
