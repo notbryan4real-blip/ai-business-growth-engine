@@ -2,6 +2,12 @@
 
 A phone-first, approval-gated workflow for qualifying local-business prospects, generating focused offers, and tracking sales opportunities.
 
+## Live dashboard
+
+**Open the dashboard:** https://notbryan4real-blip.github.io/ai-business-growth-engine/
+
+The static dashboard is published on GitHub Pages. Its browser-local workspace supports prospect records, transparent scoring, sales drafts, pipeline tracking, revenue logging, and JSON export. Browser-local data remains on the device/browser and should be exported regularly. The AI Agent Lab requires the API deployment and credentials below before it can run model calls.
+
 ## Current product
 
 - `dashboard/index.html`: mobile-first command center for prospect records, transparent scoring, sales drafts, pipeline tracking, revenue logging, and JSON backup.
@@ -47,9 +53,10 @@ Example agent request:
 
 ## Deployment status
 
-The API deployment blueprint is ready, but the service is **not considered live until it is deployed with secrets configured and tested**. The browser dashboard deployment is also not confirmed live: the GitHub Pages workflow failed because the connected GitHub integration cannot create/enable a Pages site. This requires hosting permissions or a different authorized deployment path.
-
-The Render free-tier blueprint is a deployment starting point. Free instances may sleep; the JSON file store is ephemeral on typical free instances and is not production-grade persistent storage. Use a managed database/persistent volume before relying on it for ongoing business records.
+- **Dashboard:** deployed successfully through GitHub Pages. Deployment workflow: https://github.com/notbryan4real-blip/ai-business-growth-engine/actions/runs/38516537524
+- **AI API:** not yet deployed or verified live. The Render blueprint is ready, but no active Render connection/service was available in the current workflow. The API also requires an authorized AI-provider key and a private `APP_API_TOKEN`.
+- **Persistence:** the API currently writes to a JSON file. Typical free web instances may sleep and may not preserve local files, so use a managed database or persistent volume before relying on it for ongoing business records.
+- **Cloudflare:** the connected integration currently fails authentication, so no deployment was made there.
 
 ## Evidence and safety
 
