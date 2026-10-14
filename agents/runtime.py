@@ -97,7 +97,7 @@ def _call_anthropic(agent: dict[str, str], payload: dict[str, Any], prior: list[
 
 def run_specialists(prospect: dict[str, Any], agent_ids: list[str] | None = None) -> dict[str, Any]:
     """Run selected specialist agents sequentially, passing earlier results forward."""
-    selected_ids = set(agent_ids or [agent["id"] for agent in AGENTS])
+    selected_ids = set([agent["id"] for agent in AGENTS] if agent_ids is None else agent_ids)
     selected = [agent for agent in AGENTS if agent["id"] in selected_ids]
     if not selected:
         raise ValueError("Select at least one valid agent.")
