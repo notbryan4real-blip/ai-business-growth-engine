@@ -1,9 +1,9 @@
 from __future__ import annotations
-import json, os, uuid
+import hmac, json, os, uuid
 from pathlib import Path
 from threading import Lock
 from typing import Any
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, Header, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 from agents.runtime import AGENTS, AgentRuntimeError, run_specialists
@@ -32,6 +32,14 @@ class RunInput(BaseModel):
     prospect: ProspectInput
     agent_ids: list[str] = Field(default_factory=lambda: [a["id"] for a in AGENTS], max_length=6)
 
+def require_api_token(authorization: str | None) -> None:
+    expected = os.getenv("APP_API_TOKEN")
+    if not expected:
+        raise HTTPException(status_code=503, detail="APP_API_TOKEN is not configured; protected actions are disabled.")
+    supplied = authorization.removeprefix("Bearer ").strip() if authorization else ""
+    if not hmac.compare_digest(supplied, expected):
+        raise HTTPException(status_code=401, detail="A valid bearer token is required.")
+
 def read_store() -> dict[str, Any]:
     if not DATA_PATH.exists(): return {"prospects": [], "runs": []}
     try: return json.loads(DATA_PATH.read_text(encoding="utf-8"))
@@ -45,7 +53,7 @@ def write_store(store: dict[str, Any]) -> None:
 
 @app.get("/api/health")
 def health():
-    return {"status":"ok","service":"growth-engine-api","ai_configured":bool(os.getenv("AI_API_KEY") or os.getenv("ANTHROPIC_API_KEY")),"agent_count":len(AGENTS),"persistence":str(DATA_PATH)}
+    return {"status":"ok","service":"growth-engine-api","ai_configured":bool(os.getenv("AI_API_KEY") or os.getenv("ANTHROPIC_API_KEY")),"api_token_configured":bool(os.getenv("APP_API_TOKEN")),"agent_count":len(AGENTS),"persistence":str(DATA_PATH)}
 
 @app.get("/api/agents")
 def list_agents():
@@ -56,7 +64,8 @@ def list_prospects():
     with LOCK: return read_store()
 
 @app.post("/api/prospects")
-def create_prospect(p: ProspectInput):
+def create_prospect(p: ProspectInput, authorization: str | None = Header(default=None)):
+    require_api_token(authorization)
     record=p.model_dump()
     model=Prospect(business_name=record["business_name"],category=record["category"],location=record["location"],website_url=record["website_url"],source_url=record["source_url"],rating=record["rating"],review_count=record["review_count"],website_quality_score=record["website_quality_score"],social_urls=record["social_urls"],notes=record["notes"]+record["verified_observations"])
     model.validate()
@@ -67,7 +76,8 @@ def create_prospect(p: ProspectInput):
     return record
 
 @app.post("/api/agents/run")
-def run_agents(request: RunInput):
+def run_agents(request: RunInput, authorization: str | None = Header(default=None)):
+    require_api_token(authorization)
     evidence=request.prospect.model_dump()
     if not evidence.get("verified_observations") and not evidence.get("notes"):
         evidence["evidence_warning"]="No observations or notes supplied; avoid business-specific claims."
