@@ -48,7 +48,7 @@ def _call_anthropic(agent: dict[str, str], payload: dict[str, Any], prior: list[
     key = os.getenv("AI_API_KEY") or os.getenv("ANTHROPIC_API_KEY")
     if not key:
         raise AgentRuntimeError("AI_API_KEY is not configured. Set it in the hosting environment; never commit it to source control.")
-    model = os.getenv("AI_MODEL", "claude-3-5-haiku-latest")
+    model = os.getenv("AI_MODEL", "claude-haiku-4-5")
     body = {
         "model": model,
         "max_tokens": 900,
