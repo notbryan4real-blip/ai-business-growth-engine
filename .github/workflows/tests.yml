@@ -23,3 +23,12 @@ jobs:
         env:
           PYTHONPATH: .
         run: pytest -q
+      - name: Check dashboard JavaScript syntax
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          html = Path("dashboard/index.html").read_text(encoding="utf-8")
+          script = html.split("<script>", 1)[1].split("</script>", 1)[0]
+          Path("/tmp/dashboard.js").write_text(script, encoding="utf-8")
+          PY
+          node --check /tmp/dashboard.js
