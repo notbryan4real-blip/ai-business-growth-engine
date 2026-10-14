@@ -34,7 +34,7 @@ API routes:
 - `POST /api/prospects` — score and save a prospect
 - `POST /api/agents/run` — run selected specialist agents in sequence
 
-Set `AI_API_KEY` to an Anthropic API key in the hosting environment. Set `AI_MODEL` to a model enabled for that account; default: `claude-haiku-4-5`. Set `APP_API_TOKEN` to a long random secret. Mutating endpoints and agent runs require `Authorization: Bearer <APP_API_TOKEN>`. Never put either secret in source control or in browser-side JavaScript.
+Set `AI_API_KEY` to an Anthropic API key in the hosting environment. Set `AI_MODEL` to a model enabled for that account; default: `claude-haiku-4-5`. The Render blueprint generates `APP_API_TOKEN` automatically; copy its value from the Render environment settings into the dashboard's session-only token field. Mutating endpoints and agent runs require `Authorization: Bearer <APP_API_TOKEN>`. Never put either secret in source control or commit it to browser-side JavaScript.
 
 Example agent request:
 
