@@ -23,6 +23,10 @@ jobs:
         env:
           PYTHONPATH: .
         run: pytest -q
+      - name: Smoke-test API imports
+        env:
+          PYTHONPATH: .
+        run: python -c "import app; print(app.app.title)"
       - name: Check dashboard JavaScript syntax
         run: |
           python - <<'PY'
