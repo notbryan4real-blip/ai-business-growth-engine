@@ -1,13 +1,13 @@
 """Minimal HTTP API for Crypto Nexus. Paper-only; no exchange order endpoints."""
 import os
-from fastapi import FastAPI, HTTPException, Query
+from fastapi import FastAPI, HTTPException, Query, Header
 from fastapi.middleware.cors import CORSMiddleware
 from engine import analyze_market, fetch_klines, MarketDataError, AGENTS
 from ai_pipeline import run_crypto_agents
 from backtest import run_backtest
 
 app=FastAPI(title="Crypto Nexus Research API",version="0.2.0",description="Historical strategy evaluation and optional AI-agent research. Paper-only; no real orders.")
-app.add_middleware(CORSMiddleware,allow_origins=["*"],allow_methods=["GET"],allow_headers=["*"])
+app.add_middleware(CORSMiddleware,allow_origins=["*"],allow_methods=["GET"],allow_headers=["*"])\n\ndef require_ai_access(x_api_token: str | None):\n    expected=os.getenv("APP_API_TOKEN")\n    if not expected or not x_api_token or x_api_token != expected:\n        raise HTTPException(status_code=401,detail="AI endpoint requires the private API access token configured in the hosting dashboard.")
 
 @app.get("/health")
 def health():
