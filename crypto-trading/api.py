@@ -7,7 +7,12 @@ from ai_pipeline import run_crypto_agents
 from backtest import run_backtest
 
 app=FastAPI(title="Crypto Nexus Research API",version="0.2.0",description="Historical strategy evaluation and optional AI-agent research. Paper-only; no real orders.")
-app.add_middleware(CORSMiddleware,allow_origins=["*"],allow_methods=["GET"],allow_headers=["*"])\n\ndef require_ai_access(x_api_token: str | None):\n    expected=os.getenv("APP_API_TOKEN")\n    if not expected or not x_api_token or x_api_token != expected:\n        raise HTTPException(status_code=401,detail="AI endpoint requires the private API access token configured in the hosting dashboard.")
+app.add_middleware(CORSMiddleware,allow_origins=["*"],allow_methods=["GET"],allow_headers=["*"])
+
+def require_ai_access(x_api_token: str | None):
+    expected=os.getenv("APP_API_TOKEN")
+    if not expected or not x_api_token or x_api_token != expected:
+        raise HTTPException(status_code=401,detail="AI endpoint requires the private API access token configured in the hosting dashboard.")
 
 @app.get("/health")
 def health():
@@ -51,7 +56,6 @@ def ai_backtest(symbol: str=Query(default="BTCUSDT",max_length=20), interval: st
     try:
         candles=fetch_klines(symbol,interval,limit)
         if len(candles)<180: raise ValueError("Need at least 180 candles.")
-        # Spread test points over history; each snapshot only uses candles before that point.
         start=max(60,int(len(candles)*0.55))
         end=len(candles)-horizon-1
         if end<=start: raise ValueError("Not enough candles for requested forward horizon.")
@@ -60,12 +64,14 @@ def ai_backtest(symbol: str=Query(default="BTCUSDT",max_length=20), interval: st
         for idx in indices:
             history=candles[:idx+1]
             closes=[c["close"] for c in history]
-            sma20=sum(closes[-20:])/20; sma50=sum(closes[-50:])/50
+            sma20=sum(closes[-20:])/20
+            sma50=sum(closes[-50:])/50
             changes=[closes[j]/closes[j-1]-1 for j in range(len(closes)-24,len(closes)) if closes[j-1]]
             avg=sum(changes)/len(changes) if changes else 0
             vol=(sum((x-avg)**2 for x in changes)/max(1,len(changes)-1))**0.5*100 if changes else 0
             deltas=[closes[j]-closes[j-1] for j in range(len(closes)-14,len(closes))]
-            gains=sum(max(x,0) for x in deltas)/14; losses=sum(max(-x,0) for x in deltas)/14
+            gains=sum(max(x,0) for x in deltas)/14
+            losses=sum(max(-x,0) for x in deltas)/14
             rsi=100-100/(1+gains/losses) if losses else (100 if gains else 50)
             mom=(closes[-1]/closes[-6]-1)*100
             signal="LONG_BIAS" if sma20>sma50 and mom>0 and 45<=rsi<=70 else ("DEFENSIVE" if sma20<sma50 and mom<0 and 30<=rsi<=55 else "NO_TRADE")
@@ -73,13 +79,12 @@ def ai_backtest(symbol: str=Query(default="BTCUSDT",max_length=20), interval: st
             output=run_crypto_agents(snapshot)
             entry=float(candles[idx+1]["open"])*(1+slippage_bps/10000)
             exit_price=float(candles[idx+horizon]["close"])*(1-slippage_bps/10000)
-            forward=(exit_price/entry-1)*100 - 2*fee_bps/100
+            forward=(exit_price/entry-1)*100-2*fee_bps/100
             proposal=output["consensus"]["proposed_signal"]
-            if proposal=="LONG_BIAS": strategy_return=forward
-            else: strategy_return=0.0
+            strategy_return=forward if proposal=="LONG_BIAS" else 0.0
             results.append({"sample":len(results)+1,"as_of_ms":history[-1]["close_time"],"entry_ms":candles[idx+1]["open_time"],"evaluation_end_ms":candles[idx+horizon]["close_time"],"agent_signal":proposal,"long_bias_votes":output["consensus"]["long_bias_votes"],"defensive_votes":output["consensus"]["defensive_votes"],"paper_decision":output["paper_decision"],"forward_buy_return_after_costs_pct":round(forward,4),"signal_strategy_return_pct":round(strategy_return,4),"agents_completed":output["agents_completed"]})
         returns=[x["signal_strategy_return_pct"] for x in results]
         invested=[x["forward_buy_return_after_costs_pct"] for x in results if x["agent_signal"]=="LONG_BIAS"]
-        return {"mode":"HISTORICAL_AI_AGENT_EVALUATION_PAPER_ONLY","symbol":symbol.upper(),"interval":interval,"samples_requested":samples,"samples_completed":len(results),"model_calls":len(results)*len(AGENTS),"model":os.getenv("AI_MODEL","claude-haiku-4-5"),"horizon_candles":horizon,"cost_assumptions":{"fee_bps_per_side":fee_bps,"slippage_bps_per_side":slippage_bps},"results":results,"summary":{"long_bias_rate_pct":round(len(invested)/len(results)*100,2),"mean_signal_return_per_sample_pct":round(sum(returns)/len(returns),4),"profitable_long_signals":sum(1 for x in invested if x>0),"long_signals_evaluated":len(invested),"mean_return_when_long_pct":round(sum(invested)/len(invested),4) if invested else None,"buy_and_hold_mean_on_long_samples_pct":round(sum(invested)/len(invested),4) if invested else None},"limitations":["This is a small-sample diagnostic, not a statistically valid profitability claim.","Each sample consumes 19 paid model calls; default 3 samples = 57 calls; maximum 10 samples = 190 calls.","AI models may behave inconsistently between runs. Historical external data are not reconstructed; agents only see the supplied OHLCV snapshot and previous agent outputs.","Signals are evaluated on a fixed forward horizon, without overlapping-position portfolio accounting, so this is not a full deployable strategy backtest.","No exchange orders are placed."],"profitability_warning":"Do not treat a positive sample result as proof of an edge. Repeat across multiple assets and market regimes, then validate on untouched data and paper trade."}
+        return {"mode":"HISTORICAL_AI_AGENT_EVALUATION_PAPER_ONLY","symbol":symbol.upper(),"interval":interval,"samples_requested":samples,"samples_completed":len(results),"model_calls":len(results)*len(AGENTS),"model":os.getenv("AI_MODEL","claude-haiku-4-5"),"horizon_candles":horizon,"cost_assumptions":{"fee_bps_per_side":fee_bps,"slippage_bps_per_side":slippage_bps},"results":results,"summary":{"long_bias_rate_pct":round(len(invested)/len(results)*100,2),"mean_signal_return_per_sample_pct":round(sum(returns)/len(returns),4),"profitable_long_signals":sum(1 for x in invested if x>0),"long_signals_evaluated":len(invested),"mean_return_when_long_pct":round(sum(invested)/len(invested),4) if invested else None},"limitations":["This is a small-sample diagnostic, not a statistically valid profitability claim.","Each sample consumes 19 paid model calls; default 3 samples = 57 calls; maximum 10 samples = 190 calls.","AI models may behave inconsistently between runs. Historical external data are not reconstructed; agents only see the supplied OHLCV snapshot and previous agent outputs.","Signals are evaluated on a fixed forward horizon, without overlapping-position portfolio accounting, so this is not a full deployable strategy backtest.","No exchange orders are placed."],"profitability_warning":"Do not treat a positive sample result as proof of an edge. Repeat across multiple assets and market regimes, then validate on untouched data and paper trade."}
     except (ValueError,MarketDataError) as exc: raise HTTPException(status_code=400,detail=str(exc))
     except RuntimeError as exc: raise HTTPException(status_code=502,detail=str(exc))
