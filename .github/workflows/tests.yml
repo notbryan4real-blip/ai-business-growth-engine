@@ -19,6 +19,14 @@ jobs:
           python-version: "3.12"
       - name: Install dependencies
         run: pip install -r requirements.txt
+      - name: Install Crypto Nexus dependencies
+        run: pip install -r crypto-trading/requirements.txt
+      - name: Compile Crypto Nexus backend
+        run: python -m py_compile crypto-trading/engine.py crypto-trading/api.py crypto-trading/ai_pipeline.py crypto-trading/backtest.py
+      - name: Smoke-test Crypto Nexus API imports
+        env:
+          PYTHONPATH: crypto-trading
+        run: python -c "import api; print(api.app.title)"
       - name: Run tests
         env:
           PYTHONPATH: .
