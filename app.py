@@ -30,7 +30,7 @@ class ProspectInput(BaseModel):
 
 class RunInput(BaseModel):
     prospect: ProspectInput
-    agent_ids: list[str] = Field(default_factory=lambda: [a["id"] for a in AGENTS], max_length=6)
+    agent_ids: list[str] = Field(default_factory=lambda: [a["id"] for a in AGENTS], max_length=19)
 
 def require_api_token(authorization: str | None) -> None:
     expected = os.getenv("APP_API_TOKEN")

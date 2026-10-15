@@ -15,12 +15,25 @@ from typing import Any
 
 
 AGENTS: list[dict[str, str]] = [
+    {"id": "orchestrator", "name": "Executive Orchestrator", "goal": "Summarize the objective, identify which specialist roles are relevant, sequence work, and flag dependencies. Do not claim to dynamically dispatch agents; this runtime executes the selected catalog sequentially."},
+    {"id": "market", "name": "Market Intelligence", "goal": "Assess supplied industry and location context; list market hypotheses requiring validation. Do not invent statistics or competitors."},
+    {"id": "discovery", "name": "Business Discovery", "goal": "Organize supplied candidate businesses and identify missing fields needed for prospecting. Do not claim to search live sources."},
+    {"id": "verification", "name": "Business Verification", "goal": "Separate supplied business facts from unverified claims and identify what must be independently checked before outreach."},
+    {"id": "competitive", "name": "Competitive Research", "goal": "Compare competitors only when evidence is supplied; otherwise provide a research checklist and label all hypotheses."},
     {"id": "qualification", "name": "Opportunity Qualification", "goal": "Assess fit, evidence quality, buying signals, risks, and whether to pursue. Separate observed facts from assumptions."},
-    {"id": "market", "name": "Market Intelligence", "goal": "Assess the supplied industry/location context and list market hypotheses that require validation. Do not invent statistics or competitors."},
-    {"id": "audit", "name": "Digital Presence Audit", "goal": "Identify conversion and digital-presence gaps only from the supplied website/audit evidence. Mark missing evidence explicitly."},
+    {"id": "audit", "name": "Digital Presence Audit", "goal": "Identify conversion and digital-presence gaps only from supplied website/audit evidence. Mark missing evidence explicitly."},
+    {"id": "website", "name": "Website Strategy", "goal": "Recommend a site structure, conversion path, and mobile-first improvements based on supplied evidence and the target customer's needs."},
+    {"id": "copywriting", "name": "Copywriting", "goal": "Draft clear, specific marketing copy grounded in supplied facts. Avoid unsupported superlatives, guarantees, and fabricated testimonials."},
+    {"id": "pricing", "name": "Proposal and Pricing", "goal": "Create a fixed-scope proposal and explain pricing assumptions, deliverables, exclusions, acceptance criteria, and delivery risks."},
+    {"id": "sales_intel", "name": "Sales Intelligence", "goal": "Identify likely decision-maker concerns, buying signals, objections, and follow-up questions from supplied evidence; label inferences."},
+    {"id": "outreach", "name": "Outreach Planner", "goal": "Prepare a compliant, respectful outreach sequence for human review only. Never send messages or claim contact occurred."},
+    {"id": "project", "name": "Project Manager", "goal": "Turn an approved offer into ordered tasks, owners, dependencies, milestones, and a practical delivery checklist."},
+    {"id": "customer_success", "name": "Customer Success", "goal": "Propose onboarding, communication, feedback, retention, and renewal steps appropriate to the supplied service."},
+    {"id": "automation", "name": "Automation Architect", "goal": "Suggest a low-cost automation design with triggers, actions, failure handling, human approval gates, and tools that still need setup."},
+    {"id": "finance", "name": "Finance and Cost Control", "goal": "Estimate costs and unit economics only from supplied prices and assumptions; distinguish estimates from known expenses and flag recurring costs."},
+    {"id": "qa", "name": "Quality Assurance", "goal": "Check findings for unsupported claims, contradictions, scope risks, privacy concerns, and missing acceptance criteria. Do not add unsupported facts."},
     {"id": "offer", "name": "Offer Strategist", "goal": "Design one small, deliverable, fixed-scope offer with measurable acceptance criteria, reasonable pricing hypothesis, exclusions, and low delivery risk."},
-    {"id": "sales", "name": "Sales Drafting", "goal": "Draft a respectful, personalized first-contact message based only on verified observations. Never send it. Flag every fact requiring review."},
-    {"id": "qa", "name": "Quality Assurance", "goal": "Check all preceding findings for unsupported claims, contradictions, scope risks, and next steps. Do not add new unsupported facts."},
+    {"id": "sales", "name": "Sales Drafting", "goal": "Draft a respectful, personalized first-contact message based only on supplied verified observations. Never send it. Flag every fact requiring review."},
 ]
 
 SYSTEM = """You are a specialist inside a small-business opportunity research system.
@@ -97,8 +110,9 @@ def _call_anthropic(agent: dict[str, str], payload: dict[str, Any], prior: list[
 
 def run_specialists(prospect: dict[str, Any], agent_ids: list[str] | None = None) -> dict[str, Any]:
     """Run selected specialist agents sequentially, passing earlier results forward."""
-    selected_ids = set([agent["id"] for agent in AGENTS] if agent_ids is None else agent_ids)
-    unknown = selected_ids - {agent["id"] for agent in AGENTS}
+    selected_ids = list(dict.fromkeys([agent["id"] for agent in AGENTS] if agent_ids is None else agent_ids))
+    known_ids = {agent["id"] for agent in AGENTS}
+    unknown = set(selected_ids) - known_ids
     if unknown:
         raise ValueError("Unknown agent IDs: " + ", ".join(sorted(unknown)))
     selected = [agent for agent in AGENTS if agent["id"] in selected_ids]
