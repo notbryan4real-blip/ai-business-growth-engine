@@ -27,5 +27,5 @@ services:
     envVars:
       - key: AI_MODEL
         value: claude-haiku-4-5
-      - key: AI_API_KEY
-        sync: false
+      - key: APP_API_TOKEN
+        generateValue: true
