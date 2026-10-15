@@ -44,12 +44,14 @@ Deploy the `crypto-trading/` folder as a separate web service (for example, on R
 The 19-agent endpoint is disabled until `AI_API_KEY` or `ANTHROPIC_API_KEY` is added as a **private server-side environment variable**. One analysis can make up to 19 paid model calls. Do not place keys in the browser, GitHub source, or a public dashboard. The endpoint never places orders.
 
 ## Next engineering milestones
-1. Connect a read-only public market-data feed and timestamp every observation.
-2. Add a backend API and persist each agent input/output, source, latency, and error.
-3. Implement a deterministic paper portfolio with fees, slippage, stop rules, max drawdown, and position limits.
-4. Backtest using historical candles without look-ahead bias; report fees, drawdown, Sharpe/Sortino where appropriate, and out-of-sample results.
-5. Add the paid model API only after budget approval, with token/cost limits and structured outputs.
+1. Connect the 3D handoff panel to the backend's real event stream so it shows actual model outputs, not illustrative packets.
+2. Persist each agent input/output, source, latency, token usage, and error; add a per-run cost ceiling.
+3. Extend the paper ledger with sells, stop rules, max drawdown, exposure limits, and complete fee/slippage accounting.
+4. Backtest without look-ahead bias and report drawdown, trade count, expectancy, and out-of-sample performance before interpreting returns.
+5. Run the AI pipeline only after budget approval and confirm the provider/model configuration; 19 agent calls can cost money per run.
 6. Consider real exchange execution only after extensive paper trading and explicit separate approval. If ever enabled, use least-privilege trade-only API keys, disable withdrawals, and enforce server-side risk limits.
 
 ## Open the visualizer
-When the repository's GitHub Pages deployment completes, open `/crypto.html` on the published Pages site.
+[Open Crypto Nexus — 3D command center](https://notbryan4real-blip.github.io/ai-business-growth-engine/crypto.html)
+
+The dashboard includes a read-only BTC/USDT public quote. Its handoff packets are illustrative; the paid backend pipeline is not yet deployed or wired into the visualizer.
