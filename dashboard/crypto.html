@@ -1,0 +1,177 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"><meta name="theme-color" content="#03070c"><title>CRYPTO NEXUS — 19-Agent Trading Intelligence</title>
+<style>
+:root{--cyan:#57f3ff;--blue:#388dff;--amber:#ffc66e;--green:#5dffb0;--violet:#b59cff;--ink:#03070c;--panel:rgba(4,13,24,.78);--edge:rgba(87,243,255,.26);--muted:#6c8a9f;--white:#e5fbff}
+*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:var(--ink);color:var(--white);font:12px/1.4 ui-monospace,SFMono-Regular,Consolas,monospace}body:before{content:"";position:fixed;inset:0;z-index:1;pointer-events:none;background:linear-gradient(rgba(87,243,255,.022) 1px,transparent 1px),linear-gradient(90deg,rgba(87,243,255,.022) 1px,transparent 1px);background-size:44px 44px;mask-image:linear-gradient(transparent,#000 10%,#000 80%,transparent)}#scene{position:fixed;inset:0;z-index:0}canvas{display:block;width:100%;height:100%}
+.hud{position:fixed;z-index:3;inset:0;pointer-events:none}.top{position:absolute;top:0;left:0;right:0;height:83px;padding:18px 23px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--edge);background:linear-gradient(180deg,rgba(3,7,12,.96),rgba(3,7,12,.2));pointer-events:auto}.brand{display:flex;gap:13px;align-items:center}.reactor{width:38px;height:38px;border:1px solid var(--cyan);border-radius:50%;display:grid;place-items:center;box-shadow:0 0 22px #38dfff44,inset 0 0 14px #38dfff22;position:relative}.reactor:before,.reactor:after{content:"";position:absolute;border:1px solid var(--cyan);border-radius:50%;inset:5px;opacity:.7}.reactor:after{inset:12px;background:var(--cyan);box-shadow:0 0 15px var(--cyan)}.eyebrow{font-size:9px;letter-spacing:.26em;color:var(--cyan);text-transform:uppercase}.brand h1{font:700 18px/1.05 system-ui,sans-serif;letter-spacing:.11em;margin:4px 0 0}.brand h1 span{color:var(--cyan)}.topright{display:flex;align-items:center;gap:22px;text-align:right}.sys{color:var(--green);font-size:10px;letter-spacing:.1em}.sys small{display:block;color:var(--muted);font-size:8px;margin-top:3px}.clock{font-size:10px;color:#a8c4d7}
+.panel{position:absolute;pointer-events:auto;background:linear-gradient(145deg,rgba(7,21,35,.91),rgba(3,9,17,.77));border:1px solid var(--edge);box-shadow:0 0 26px #00121f55,inset 0 0 22px #0b203322;backdrop-filter:blur(12px);clip-path:polygon(0 0,calc(100% - 14px) 0,100% 14px,100% 100%,14px 100%,0 calc(100% - 14px))}
+.left{left:22px;top:105px;width:228px;padding:15px}.right{right:22px;top:105px;width:255px;padding:15px}.panelhead{display:flex;justify-content:space-between;align-items:center;color:var(--cyan);font-size:9px;letter-spacing:.18em;margin-bottom:14px}.tiny{color:var(--muted);font-size:8px;letter-spacing:.08em}.readout{display:grid;grid-template-columns:1fr 1fr;gap:8px}.stat{border-left:2px solid #2f9ba8;background:#09202c88;padding:10px 9px}.stat b{display:block;font:500 24px/1.1 system-ui,sans-serif;letter-spacing:-.04em;color:#e6fdff}.stat span{font-size:8px;color:var(--muted);letter-spacing:.1em}.section{border-top:1px solid #18364a;margin-top:13px;padding-top:12px}.meterrow{display:flex;justify-content:space-between;color:#9bb8c9;font-size:9px;margin:9px 0 5px}.meter{height:3px;background:#132b3a;overflow:hidden}.meter i{display:block;height:100%;background:linear-gradient(90deg,#247cff,var(--cyan));box-shadow:0 0 9px var(--cyan)}.agentname{font:600 21px/1.1 system-ui,sans-serif;margin:4px 0 7px;color:#f0fcff}.tag{display:inline-block;padding:4px 6px;border:1px solid #226777;color:var(--cyan);font-size:8px;letter-spacing:.12em}.desc{color:#9bb2c4;font:11px/1.6 system-ui,sans-serif;margin:12px 0}.label{font-size:8px;letter-spacing:.16em;color:var(--muted);text-transform:uppercase}.feed{display:flex;flex-direction:column;gap:9px}.feedline{font-size:9px;color:#aac3d3;display:flex;gap:8px;line-height:1.45}.dot{width:5px;height:5px;flex:0 0 5px;border-radius:50%;margin-top:4px;background:var(--green);box-shadow:0 0 7px var(--green)}.steps{display:grid;grid-template-columns:repeat(4,1fr);gap:5px}.step{padding:7px 4px;text-align:center;border:1px solid #1d394a;color:#5d7b8d;font-size:8px}.step.active{border-color:var(--cyan);color:var(--cyan);background:#0a3541;box-shadow:0 0 12px #28cbe522}.bottom{position:absolute;left:50%;bottom:18px;transform:translateX(-50%);width:min(520px,calc(100% - 36px));pointer-events:auto;text-align:center}.commandbar{display:flex;justify-content:center;gap:7px;margin-bottom:10px}button{font:9px ui-monospace,monospace;letter-spacing:.08em;color:#bdebf5;background:#061722;border:1px solid #245064;padding:10px 14px;cursor:pointer}button:hover,button.active{border-color:var(--cyan);color:var(--cyan);box-shadow:0 0 15px #39e8ff22}button.primary{background:#0b3440;border-color:var(--cyan);color:#dffcff}.hint{color:#57778a;font-size:8px;letter-spacing:.1em;text-shadow:0 1px 5px #000}.crosshair{position:absolute;left:50%;top:50%;width:44px;height:44px;transform:translate(-50%,-50%);border:1px solid #62eaff25;border-radius:50%;pointer-events:none}.crosshair:before,.crosshair:after{content:"";position:absolute;background:#62eaff55}.crosshair:before{height:1px;left:-10px;right:-10px;top:50%}.crosshair:after{width:1px;top:-10px;bottom:-10px;left:50%}.corner{position:absolute;width:24px;height:24px;border-color:#57f3ff70;border-style:solid}.tl{top:95px;left:10px;border-width:1px 0 0 1px}.tr{top:95px;right:10px;border-width:1px 1px 0 0}.bl{bottom:10px;left:10px;border-width:0 0 1px 1px}.br{bottom:10px;right:10px;border-width:0 1px 1px 0}.load{position:fixed;z-index:10;inset:0;background:#03070c;display:grid;place-items:center;text-align:center;color:var(--cyan);letter-spacing:.2em;font-size:10px}.load strong{display:block;color:#eaffff;font:500 24px system-ui,sans-serif;letter-spacing:.12em;margin-bottom:10px}.load em{display:block;color:#5e8396;font-style:normal;letter-spacing:.08em;margin-top:10px}.hide{display:none!important}
+@media(max-width:760px){.top{height:72px;padding:12px}.brand h1{font-size:14px}.reactor{width:30px;height:30px}.topright{gap:0}.clock{display:none}.left{left:10px;top:85px;width:150px;padding:10px}.right{right:10px;top:85px;width:165px;padding:10px}.panelhead{font-size:8px;margin-bottom:9px}.readout{gap:5px}.stat{padding:7px 6px}.stat b{font-size:19px}.stat span{font-size:7px}.section{margin-top:9px;padding-top:8px}.agentname{font-size:16px}.desc{font-size:10px;line-height:1.4;margin:8px 0}.feed{gap:7px}.feedline{font-size:8px}.bottom{bottom:12px}.commandbar{gap:4px}.commandbar button{padding:9px 10px;font-size:8px}.hint{font-size:7px}.crosshair{top:55%}}
+@media(max-width:390px){.left{width:132px}.right{width:145px}.brand h1{font-size:12px}.eyebrow{font-size:7px}.stat b{font-size:17px}.right .tiny{display:none}}
+
+/* Compact HUD: prioritize the 3D scene over the information panels */
+.left{left:14px;top:94px;width:174px;padding:10px;opacity:.86}
+.right{right:14px;top:94px;width:198px;padding:10px;opacity:.86}
+.panel{backdrop-filter:blur(8px);box-shadow:0 8px 24px #0005,inset 0 0 14px #0b203322}
+.panelhead{font-size:8px;margin-bottom:9px}
+.readout{gap:5px}
+.stat{padding:6px 6px}
+.stat b{font-size:19px}
+.stat span{font-size:7px;letter-spacing:.04em}
+.section{margin-top:8px;padding-top:8px}
+.meterrow{font-size:8px;margin:6px 0 4px}
+.agentname{font-size:17px}
+.desc{font-size:10px;line-height:1.45;margin:8px 0}
+.feed{gap:6px}
+.feedline{font-size:8px;line-height:1.35}
+.steps{gap:3px}
+.step{padding:5px 2px;font-size:7px}
+.label{font-size:7px}
+.tag{font-size:7px;padding:3px 5px}
+@media(max-width:760px){
+ .left{left:7px;top:81px;width:124px;padding:7px}
+ .right{right:7px;top:81px;width:137px;padding:7px}
+ .panelhead{font-size:7px;letter-spacing:.08em;margin-bottom:7px}
+ .stat{padding:5px 4px}
+ .stat b{font-size:16px}
+ .stat span{font-size:6px}
+ .section{margin-top:6px;padding-top:6px}
+ .meterrow{font-size:6px}
+ .agentname{font-size:13px}
+ .desc{font-size:9px;line-height:1.3;margin:6px 0}
+ .feedline{font-size:7px;gap:5px}
+ .tiny{font-size:6px}
+ .step{font-size:6px;padding:4px 1px}
+ .label{font-size:6px;letter-spacing:.1em}
+ .tag{font-size:6px;letter-spacing:.05em}
+ .bottom{bottom:8px}
+ .commandbar{gap:3px;margin-bottom:6px}
+ .commandbar button{padding:7px 7px;font-size:7px}
+ .hint{font-size:6px}
+}
+@media(max-width:390px){
+ .left{width:108px}
+ .right{width:120px}
+ .stat b{font-size:14px}
+ .agentname{font-size:12px}
+ .desc{font-size:8px}
+}
+/* Keep the scene dominant on shorter screens */
+@media(max-height:650px){
+ .left,.right{top:80px}
+ .left .section:nth-of-type(2){display:none}
+ .right .section:last-child{display:none}
+ .bottom{bottom:6px}
+ .commandbar{margin-bottom:4px}
+ .commandbar button{padding:6px 8px}
+}
+
+
+/* Optional data-bus drawer: open only when inspecting handoffs */
+.stream-panel{left:50%;bottom:64px;top:auto;transform:translateX(-50%);width:min(540px,calc(100% - 28px));max-height:34vh;padding:10px;z-index:5;opacity:.96;overflow:hidden}
+.stream-title{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:7px}
+.stream-title strong{font-size:9px;letter-spacing:.15em;color:var(--cyan)}
+.stream-meta{font-size:7px;color:var(--muted)}
+.stream-log{display:flex;flex-direction:column;gap:6px;max-height:calc(34vh - 56px);overflow:auto;padding-right:3px}
+.transfer{border:1px solid #1a3c50;background:#061521d9;padding:7px;border-left:2px solid var(--amber)}
+.transfer-head{display:flex;justify-content:space-between;gap:8px;color:#d8faff;font-size:8px}
+.transfer-head b{color:var(--amber);font-weight:600}
+.transfer-route{color:var(--cyan);font-size:8px;margin:4px 0}
+.transfer pre{margin:0;color:#9ab8c9;font:7px/1.45 ui-monospace,monospace;white-space:pre-wrap;overflow-wrap:anywhere;max-height:64px;overflow:auto}
+.stream-panel .stream-close{padding:4px 7px;font-size:7px}
+#streamToggle.active{border-color:var(--amber);color:var(--amber);box-shadow:0 0 14px #ffc66e22}
+@media(max-width:760px){.stream-panel{bottom:55px;max-height:30vh;padding:7px}.stream-log{max-height:calc(30vh - 50px)}.transfer{padding:5px}.transfer-head,.transfer-route{font-size:7px}.transfer pre{font-size:6px;max-height:48px}.stream-title strong{font-size:8px}}
+</style>
+<script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.166.1/build/three.module.js"}}</script>
+</head><body><div id="loading" class="load"><div><strong>CRYPTO NEXUS</strong>INITIALIZING HOLOGRAPHIC CORE<em>ESTABLISHING 3D NEURAL MESH...</em></div></div><div id="scene"></div>
+<div class="hud"><div class="top"><div class="brand"><div class="reactor"></div><div><div class="eyebrow">Digital-asset market intelligence</div><h1>CRYPTO <span>NEXUS</span> / 01</h1></div></div><div class="topright"><div class="sys">● SYSTEM SIMULATION<small>PAPER-TRADING VISUAL MODE // NO REAL ORDERS</small></div><div class="clock" id="clock">CORE ONLINE</div></div></div>
+<div class="panel left"><div class="panelhead"><span>◈ SYSTEM TELEMETRY</span><span class="tiny">SYS.01</span></div><div class="readout"><div class="stat"><b id="agentcount">19</b><span>AGENT NODES</span></div><div class="stat"><b id="packets">000</b><span>DATA TRANSFERS</span></div><div class="stat"><b id="phase">01</b><span>PIPELINE STAGE</span></div><div class="stat"><b id="picked">CEO</b><span>SELECTED NODE</span></div></div><div class="section"><div class="label">Signal network status</div><div class="meterrow"><span>NETWORK COHERENCE</span><span>98.4%</span></div><div class="meter"><i style="width:98.4%"></i></div><div class="meterrow"><span>ROUTING CAPACITY</span><span>86.2%</span></div><div class="meter"><i style="width:86.2%"></i></div><div class="meterrow"><span>QUALITY GATE</span><span>100%</span></div><div class="meter"><i style="width:100%;background:linear-gradient(90deg,#5dffb0,#c7ffe3)"></i></div></div><div class="section"><div class="label">Trading pipeline</div><div class="steps"><div id="s0" class="step active">01<br>INGEST</div><div id="s1" class="step">02<br>ANALYZE</div><div id="s2" class="step">03<br>VERIFY</div><div id="s3" class="step">04<br>APPROVE</div></div></div></div>
+<div class="panel right"><div class="panelhead"><span>◈ NODE INSPECTOR</span><span class="tiny" id="nodeid">NODE 00</span></div><div class="tag" id="role">EXECUTIVE CORE</div><div class="agentname" id="name">Executive Orchestrator</div><div class="label">Functional profile</div><div class="desc" id="desc">Coordinates the business growth workflow and routes work between specialist agents.</div><div class="section"><div class="label">Event stream // simulated</div><div class="feed" id="feed"><div class="feedline"><i class="dot"></i><span>Crypto Nexus network initialized.</span></div><div class="feedline"><i class="dot"></i><span>19 trading specialist nodes mapped.</span></div><div class="feedline"><i class="dot"></i><span>Awaiting paper-trading simulation.</span></div></div></div><div class="section"><div class="label">Interaction</div><div class="tiny">TAP A NODE TO INSPECT · DRAG TO ORBIT · PINCH TO ZOOM</div></div></div>
+<div id="streamPanel" class="panel stream-panel hide"><div class="stream-title"><div><strong>⇄ DATA BUS // HANDOFF INSPECTOR</strong><div class="stream-meta" id="streamMeta">PAPER-TRADING DEMO · NO REAL ORDERS</div></div><button class="stream-close" id="streamClose">CLOSE</button></div><div class="stream-log" id="streamLog"><div class="transfer"><div class="transfer-head"><b>STANDBY</b><span>WAITING FOR INITIALIZE</span></div><div class="transfer-route">Executive Orchestrator → Market Intelligence</div><pre>Payload preview appears here when the workflow starts.</pre></div></div></div><div class="crosshair"></div><div class="corner tl"></div><div class="corner tr"></div><div class="corner bl"></div><div class="corner br"></div>
+<div class="bottom"><div class="commandbar"><button id="run" class="primary">▶ INITIALIZE</button><button id="pause">Ⅱ HOLD</button><button id="next">↯ NEXT CYCLE</button><button id="reset">◎ RECENTER</button><button id="streamToggle">⇄ DATA BUS</button></div><div class="hint">HOLOGRAPHIC MODEL · INTERACTIVE 3D AGENT TOPOLOGY · DRAG / ROTATE / SELECT</div></div></div>
+<script type="module">
+import * as THREE from 'three';
+import { OrbitControls } from 'https://cdn.jsdelivr.net/npm/three@0.166.1/examples/jsm/controls/OrbitControls.js';
+const names=[
+['Executive Orchestrator','COMMAND','Coordinates the trading workflow, schedules specialist analysis, and routes market context.','core'],
+['Market Data Ingestion','LIVE DATA','Collects public market candles, ticker data, and timestamps.','research'],
+['Trend & Momentum','MOMENTUM','Measures trend direction and momentum; flags noisy or conflicting signals.','research'],
+['Volatility Regime','VOLATILITY','Classifies volatility and warns when market conditions are unstable.','research'],
+['Order Book & Liquidity','LIQUIDITY','Assesses spread and liquidity data when a supported feed is connected.','research'],
+['On-chain Intelligence','ON-CHAIN','Evaluates on-chain metrics when a verified provider is configured.','research'],
+['Sentiment Analysis','SENTIMENT','Summarizes news and sentiment inputs while labeling source and recency.','research'],
+['Macro Correlation','MACRO','Checks cross-asset and macro context supplied to the pipeline.','research'],
+['Technical Analysis','TECHNICALS','Computes indicators such as moving averages, RSI, and recent range.','strategy'],
+['Quant Strategy','STRATEGY','Converts signals into a testable, explicit strategy hypothesis.','strategy'],
+['Signal Ensemble','CONSENSUS','Combines specialist views and records disagreement rather than hiding it.','strategy'],
+['Portfolio Allocation','ALLOCATION','Proposes exposure limits and diversification constraints.','strategy'],
+['Risk Manager','RISK GATE','Rejects proposals that exceed risk limits or lack required data.','quality'],
+['Position Sizing','SIZING','Calculates paper position size from equity and predefined risk budget.','strategy'],
+['Trade Execution Planner','ORDER PLAN','Plans hypothetical orders only; live exchange execution is disabled.','strategy'],
+['Slippage & Fees','COST MODEL','Estimates trading costs and warns that assumptions need calibration.','quality'],
+['Backtest & Validation','VALIDATION','Checks strategy performance against historical data before promotion.','quality'],
+['Compliance & Guardrails','GUARDRAILS','Enforces paper-only mode, credential safety, and no-withdrawal rules.','quality'],
+['Final Trade Auditor','FINAL REVIEW','Records the rationale, risk checks, evidence gaps, and paper decision.','quality']
+];
+const root=document.getElementById('scene');
+let renderer,scene,camera,controls,core,meshGroup;const nodes=[],links=[],packets=[];let running=false,phase=0,packetTotal=0,lastSpawn=0,selected=0,transferIndex=0;
+const colors={core:0x55f4ff,research:0x398cff,strategy:0x9d8cff,quality:0x61ffb7};
+try{
+renderer=new THREE.WebGLRenderer({antialias:true,alpha:false,powerPreference:'high-performance'});renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,1.6));renderer.setSize(innerWidth,innerHeight);renderer.setClearColor(0x03070c,1);renderer.outputColorSpace=THREE.SRGBColorSpace;renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.35;root.appendChild(renderer.domElement);
+scene=new THREE.Scene();scene.fog=new THREE.FogExp2(0x03070c,.00105);
+camera=new THREE.PerspectiveCamera(42,innerWidth/innerHeight,.1,3000);camera.position.set(0,100,700);
+controls=new OrbitControls(camera,renderer.domElement);controls.enableDamping=true;controls.dampingFactor=.055;controls.rotateSpeed=.7;controls.zoomSpeed=.8;controls.minDistance=250;controls.maxDistance=1100;controls.autoRotate=true;controls.autoRotateSpeed=.28;
+scene.add(new THREE.AmbientLight(0x7da7c5,1.3));const cyanLight=new THREE.PointLight(0x23dfff,1800,1200);cyanLight.position.set(80,180,220);scene.add(cyanLight);const violetLight=new THREE.PointLight(0x6355ff,1300,1100);violetLight.position.set(-300,-130,-180);scene.add(violetLight);
+const world=new THREE.Group();scene.add(world);meshGroup=world;
+const sphereMat=new THREE.MeshPhysicalMaterial({color:0x06253a,emissive:0x00506a,emissiveIntensity:1.4,metalness:.72,roughness:.2,transparent:true,opacity:.82,clearcoat:1,clearcoatRoughness:.12});
+core=new THREE.Mesh(new THREE.IcosahedronGeometry(47,3),sphereMat);world.add(core);
+const coreWire=new THREE.Mesh(new THREE.IcosahedronGeometry(53,2),new THREE.MeshBasicMaterial({color:0x57f3ff,wireframe:true,transparent:true,opacity:.42}));world.add(coreWire);
+const haloMat=new THREE.MeshBasicMaterial({color:0x36eaff,transparent:true,opacity:.78});
+for(let i=0;i<4;i++){const torus=new THREE.Mesh(new THREE.TorusGeometry(72+i*13,.55,8,180),new THREE.MeshBasicMaterial({color:i%2?0x3b8dff:0x56f6ff,transparent:true,opacity:.38-i*.045}));torus.rotation.set(.4+i*.48,.2+i*.25,.1+i*.3);torus.userData.spin=(i%2?1:-1)*(.0015+i*.0005);world.add(torus);links.push({ring:torus});}
+const positions=[new THREE.Vector3(0,0,0)];
+for(let i=1;i<names.length;i++){const layer=i<=6?0:i<=12?1:2;const j=layer===0?i-1:layer===1?i-7:i-13;const count=layer===2?6:6;const a=(j/count)*Math.PI*2+layer*.42;const radius=[150,255,360][layer];const y=Math.sin(a*2.1+layer)*[85,125,145][layer]+(layer-1)*14;positions.push(new THREE.Vector3(Math.cos(a)*radius,y,Math.sin(a)*radius*.82));}
+const nodeMeshes=[];
+names.forEach((n,i)=>{const p=positions[i],col=colors[n[3]];const group=new THREE.Group();group.position.copy(p);world.add(group);
+const r=i===0?17:9;const mat=new THREE.MeshPhysicalMaterial({color:col,emissive:col,emissiveIntensity:i===0?1.7:.75,metalness:.55,roughness:.22,clearcoat:1});const geo=new THREE.IcosahedronGeometry(r,i===0?2:1);const orb=new THREE.Mesh(geo,mat);group.add(orb);
+const wire=new THREE.Mesh(new THREE.IcosahedronGeometry(r*1.42,1),new THREE.MeshBasicMaterial({color:col,wireframe:true,transparent:true,opacity:.6}));group.add(wire);
+const ring=new THREE.Mesh(new THREE.TorusGeometry(r*1.9,.45,6,48),new THREE.MeshBasicMaterial({color:col,transparent:true,opacity:.7}));ring.rotation.x=Math.PI/2;group.add(ring);
+const labelCanvas=document.createElement('canvas');labelCanvas.width=512;labelCanvas.height=80;const ctx=labelCanvas.getContext('2d');ctx.font='600 24px ui-monospace,monospace';ctx.textAlign='center';ctx.fillStyle='#d9faff';ctx.shadowColor='#44eaff';ctx.shadowBlur=10;ctx.fillText(n[0].toUpperCase(),256,40);const tex=new THREE.CanvasTexture(labelCanvas);tex.colorSpace=THREE.SRGBColorSpace;const sprite=new THREE.Sprite(new THREE.SpriteMaterial({map:tex,transparent:true,depthWrite:false}));sprite.position.y=r+17;sprite.scale.set(i===0?130:115,18,1);group.add(sprite);
+group.userData={id:i,orb,wire,ring,sprite,base:p.clone(),phase:Math.random()*6};nodes.push(group);nodeMeshes.push(orb);});
+const linkMat=new THREE.LineBasicMaterial({color:0x22829b,transparent:true,opacity:.34});function addLink(a,b){const curve=new THREE.QuadraticBezierCurve3(positions[a],positions[a].clone().lerp(positions[b],.5).add(new THREE.Vector3(0,24,0)),positions[b]);const line=new THREE.Line(new THREE.BufferGeometry().setFromPoints(curve.getPoints(24)),linkMat);world.add(line);links.push({line,a,b,curve});}
+for(let i=1;i<names.length;i++){addLink(0,i);if(i>1)addLink(i,i-1);if(i>6)addLink(i,i-6);}
+for(let r of [190,300,410]){const ring=new THREE.Mesh(new THREE.TorusGeometry(r,.35,6,240),new THREE.MeshBasicMaterial({color:0x17617b,transparent:true,opacity:.34}));ring.rotation.set(.9+r/700,.2+r/900,.3);world.add(ring);links.push({ring,spin:.0006});}
+const grid=new THREE.GridHelper(1300,54,0x14506a,0x0a2537);grid.position.y=-235;grid.material.transparent=true;grid.material.opacity=.32;scene.add(grid);
+const starGeo=new THREE.BufferGeometry(),starPts=[];for(let i=0;i<1400;i++)starPts.push((Math.random()-.5)*1900,(Math.random()-.5)*1300,(Math.random()-.5)*1700);starGeo.setAttribute('position',new THREE.Float32BufferAttribute(starPts,3));scene.add(new THREE.Points(starGeo,new THREE.PointsMaterial({color:0x7edfff,size:1.35,transparent:true,opacity:.65,sizeAttenuation:true})));
+const scan=new THREE.Mesh(new THREE.TorusGeometry(440,.65,6,180),new THREE.MeshBasicMaterial({color:0x43eaff,transparent:true,opacity:.5}));scan.rotation.x=Math.PI/2;world.add(scan);
+const raycaster=new THREE.Raycaster(),pointer=new THREE.Vector2();let downX=0,downY=0;
+renderer.domElement.addEventListener('pointerdown',e=>{downX=e.clientX;downY=e.clientY;});
+renderer.domElement.addEventListener('pointerup',e=>{if(Math.hypot(e.clientX-downX,e.clientY-downY)>7)return;const rect=renderer.domElement.getBoundingClientRect();pointer.x=(e.clientX-rect.left)/rect.width*2-1;pointer.y=-(e.clientY-rect.top)/rect.height*2+1;raycaster.setFromCamera(pointer,camera);const hit=raycaster.intersectObjects(nodeMeshes,false)[0];if(hit)inspect(hit.object.parent.userData.id);});
+function feed(s){const f=document.getElementById('feed'),d=document.createElement('div');d.className='feedline';d.innerHTML='<i class="dot"></i><span></span>';d.lastElementChild.textContent=s;f.prepend(d);while(f.children.length>4)f.lastChild.remove();}
+function inspect(i){selected=i;const n=names[i];document.getElementById('name').textContent=n[0];document.getElementById('role').textContent=n[1];document.getElementById('desc').textContent=n[2];document.getElementById('picked').textContent=i===0?'CEO':String(i).padStart(2,'0');document.getElementById('nodeid').textContent='NODE '+String(i).padStart(2,'0');nodes.forEach((o,j)=>{o.scale.setScalar(j===i?1.22:1);o.userData.wire.material.opacity=j===i?.95:.58;});feed('Inspector focused on '+n[0]+'.');}
+function showTransfer(a,b,payload){
+const log=document.getElementById('streamLog');const item=document.createElement('div');item.className='transfer';
+const head=document.createElement('div');head.className='transfer-head';const id=document.createElement('b');id.textContent=payload.transfer_id+' · '+payload.event;const state=document.createElement('span');state.textContent='SIMULATED';head.append(id,state);
+const route=document.createElement('div');route.className='transfer-route';route.textContent=names[a][0]+' → '+names[b][0];
+const pre=document.createElement('pre');pre.textContent=JSON.stringify(payload,null,2);item.append(head,route,pre);log.prepend(item);while(log.children.length>5)log.lastElementChild.remove();
+document.getElementById('streamMeta').textContent='PAPER-TRADING DEMO · '+packetTotal+' HANDOFFS · NO REAL ORDERS';
+}
+function packet(a,b,payload={}){const m=new THREE.Mesh(new THREE.SphereGeometry(3.2,12,12),new THREE.MeshBasicMaterial({color:0xffd17c}));world.add(m);packets.push({mesh:m,a:positions[a].clone(),b:positions[b].clone(),t:0,duration:1.1});packetTotal++;document.getElementById('packets').textContent=String(packetTotal).padStart(3,'0');showTransfer(a,b,payload);}
+function advance(){
+phase=(phase+1)%4;document.getElementById('phase').textContent=String(phase+1).padStart(2,'0');['s0','s1','s2','s3'].forEach((id,i)=>document.getElementById(id).classList.toggle('active',i===phase));
+const msgs=['Market data → specialist handoff','Specialists analyzing market conditions','Risk and strategy validation','Paper-trade approval gate'];feed(msgs[phase]);
+const a=transferIndex===0?0:((transferIndex-1)%18)+1;const b=(transferIndex%18)+1;transferIndex++;
+const events=['TASK_DISPATCH','CONTEXT_HANDOFF','FINDINGS_RETURNED','QUALITY_CHECK','APPROVAL_REQUIRED'];
+const payload={transfer_id:'TX-'+String(packetTotal+1).padStart(4,'0'),event:events[packetTotal%events.length],source:{agent_id:String(a).padStart(2,'0'),name:names[a][0]},target:{agent_id:String(b).padStart(2,'0'),name:names[b][0]},workflow_stage:['INGEST','ANALYZE','VERIFY','APPROVE'][phase],message:{task:'Analyze the assigned crypto-market dimension and return structured evidence for the next specialist.',context:'Pass market data and uncertainty forward; label assumptions, missing feeds, and confidence.',expected_output:['summary','findings','risks','next_actions','evidence_gaps'],handoff_rule:'Return structured findings to the next stage; never place a real order or withdraw funds.'},evidence:{mode:'DEMO_SIMULATION',market:'BTC/USDT (illustrative until live feed is connected)',mode:'PAPER_ONLY',verified_observations:[],signal_inputs:['price candles','momentum','volatility','fees and slippage assumptions']},requires_human_approval:b===11||b===18};
+packet(a,b,payload);
+}
+document.getElementById('run').onclick=()=>{running=true;controls.autoRotate=true;document.getElementById('run').textContent='● RUNNING';document.getElementById('streamPanel').classList.remove('hide');document.getElementById('streamToggle').classList.add('active');feed('Paper-trading visualization initialized.');if(packetTotal===0)advance();};
+document.getElementById('pause').onclick=()=>{running=!running;document.getElementById('pause').textContent=running?'Ⅱ HOLD':'▶ RESUME';feed(running?'Paper-trading visualization resumed.':'Paper-trading visualization paused.');};
+document.getElementById('next').onclick=()=>{document.getElementById('streamPanel').classList.remove('hide');document.getElementById('streamToggle').classList.add('active');advance();};
+document.getElementById('streamToggle').onclick=()=>{const panel=document.getElementById('streamPanel');panel.classList.toggle('hide');document.getElementById('streamToggle').classList.toggle('active',!panel.classList.contains('hide'));};
+document.getElementById('streamClose').onclick=()=>{document.getElementById('streamPanel').classList.add('hide');document.getElementById('streamToggle').classList.remove('active');};
+document.getElementById('reset').onclick=()=>{camera.position.set(0,100,700);controls.target.set(0,0,0);controls.update();inspect(0);feed('Camera recentered.');};
+const clock=new THREE.Clock();function animate(){requestAnimationFrame(animate);const delta=clock.getDelta();const t=clock.elapsedTime;controls.update();core.rotation.y=t*.13;core.rotation.x=Math.sin(t*.3)*.08;coreWire.rotation.copy(core.rotation);scan.rotation.z=t*.08;links.forEach(l=>{if(l.ring){l.ring.rotation.y+=l.spin||.0006;l.ring.rotation.z-=.00025;} });nodes.forEach((n,i)=>{const u=n.userData;u.orb.rotation.y+=.008;u.wire.rotation.x+=.003;u.ring.rotation.z+=.006;n.position.y=u.base.y+Math.sin(t*.8+u.phase)*(i===0?2:4);u.sprite.quaternion.copy(camera.quaternion);});if(running&&performance.now()-lastSpawn>900){lastSpawn=performance.now();advance();}for(let i=packets.length-1;i>=0;i--){const p=packets[i];p.t+=delta;const k=Math.min(1,p.t/p.duration);p.mesh.position.lerpVectors(p.a,p.b,k);if(k>=1){world.remove(p.mesh);p.mesh.geometry.dispose();p.mesh.material.dispose();packets.splice(i,1);}}renderer.render(scene,camera);}
+function resize(){camera.aspect=innerWidth/innerHeight;camera.fov=innerWidth<760?56:42;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight);renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,1.6));}
+window.addEventListener('resize',resize);resize();inspect(0);document.getElementById('loading').classList.add('hide');animate();document.getElementById('clock').textContent='CORE '+new Date().toISOString().slice(11,19)+'Z';setInterval(()=>{document.getElementById('clock').textContent='CORE '+new Date().toISOString().slice(11,19)+'Z';},1000);
+}catch(e){console.error(e);document.getElementById('loading').innerHTML='<div><strong>3D CORE OFFLINE</strong>WebGL could not initialize.<em>Try Chrome with hardware acceleration enabled.</em><br><small style="color:#65899b">'+String(e.message||e)+'</small></div>';}
+</script></body></html>
