@@ -1,15 +1,47 @@
-# Crypto Nexus — 19-Agent Trading Intelligence
+# Crypto Nexus — AI-Agent Trading Research & Backtesting
 
-A separate crypto-market analysis project using the same 19-node holographic visual language as Growth Engine.
+Crypto Nexus is a **paper-only research system**. It evaluates simple benchmark strategies against historical candles and provides a bounded endpoint to test the 19-agent AI pipeline's directional calls on historical snapshots. It does not place exchange orders.
 
-## Current status
-- **UI:** interactive 3D topology and inspectable data-handoff panel.
-- **Execution:** handoff packets are illustrative UI simulations, not outputs from 19 live AI calls.
-- **Trading:** paper-trading only. No exchange order placement, withdrawals, or private exchange keys.
-- **Market feed:** the dashboard reads a public, read-only BTC/USDT 24-hour ticker. The 3D handoff stream remains a demo visualization until connected to the backend's actual handoff events.
-- **Not financial advice:** a visual signal or model consensus is not proof of profitability.
+## What is implemented in the repository
 
-## Agent roster
+- Public, read-only OHLCV candle ingestion from Binance.
+- Three transparent benchmark rules: SMA/momentum filter, SMA crossover, and RSI mean reversion.
+- Fee/slippage-aware backtests with a chronological 70/30 train/holdout split, next-candle-open execution, no leverage, and metrics including net return, maximum drawdown, closed trades, win rate, profit factor, and a Sharpe-like diagnostic.
+- /api/ai-backtest: bounded historical snapshots evaluated by the real 19-call Anthropic agent pipeline. Every sample uses only candles available at that timestamp, then evaluates the consensus signal over a fixed forward horizon.
+- API health and key-configuration status.
+- Paper-only guardrails. There is no exchange execution client.
+
+**Important deployment status:** these backend files are committed in GitHub, but the API must be deployed to a Python web-service host and configured with a private server-side AI key before live AI-agent tests can run. GitHub Pages alone cannot host this Python API. Do not mistake the visual demo for a running backend.
+
+## API endpoints
+
+- GET /health — service health, 19-agent count, AI-key-configured boolean.
+- GET /api/agents — agent roster.
+- GET /api/market?symbol=BTCUSDT&interval=1h — current indicator snapshot.
+- GET /api/backtest?symbol=BTCUSDT&interval=1h&limit=1000&fee_bps=10&slippage_bps=5 — deterministic strategy benchmarks.
+- GET /api/ai-analysis?symbol=BTCUSDT&interval=1h — one current 19-agent analysis run.
+- GET /api/ai-backtest?symbol=BTCUSDT&interval=1h&limit=500&samples=3&horizon=6 — historical AI evaluation.
+
+## Deploy the API
+
+Use a Python web service such as Render:
+- Root directory: crypto-trading
+- Build command: pip install -r requirements.txt
+- Start command: uvicorn api:app --host 0.0.0.0 --port $PORT
+- Health-check path: /health
+
+Add AI_API_KEY or ANTHROPIC_API_KEY as a **private server-side environment variable** only. Never place it in the HTML, browser storage, query string, or GitHub. Choose a model in AI_MODEL if desired. The AI endpoints remain disabled until a key is configured.
+
+## AI test cost and interpretation
+
+Each historical AI sample invokes 19 model calls. The default samples=3 makes **57 model calls**; the maximum samples=10 makes **190 calls**. Model usage may cost money. Start with the deterministic /api/backtest endpoint before enabling paid AI calls.
+
+The AI historical endpoint is a bounded diagnostic, not a production-grade portfolio simulator. It reports the 19-agent consensus signal at selected timestamps and measures a fixed forward horizon after assumed fees/slippage. It does not reconstruct historical news, sentiment, order book, or on-chain feeds, and it does not simulate a continuous overlapping portfolio. AI outputs can vary across runs. A positive result on a small sample is not proof of profitability.
+
+Before considering any live trading, require large out-of-sample tests across multiple assets and market regimes, realistic fee/slippage and spread assumptions, robustness checks, a continuous paper-trading period, and strict server-side risk limits. No private exchange credentials are needed for the current research endpoints. No real orders or withdrawals are supported.
+
+## 19 specialists
+
 1. Executive Orchestrator
 2. Market Data Ingestion
 3. Trend & Momentum
@@ -29,29 +61,3 @@ A separate crypto-market analysis project using the same 19-node holographic vis
 17. Backtest & Validation
 18. Compliance & Guardrails
 19. Final Trade Auditor
-
-## Run the backend
-
-Deploy the `crypto-trading/` folder as a separate web service (for example, on Render):
-- Root directory: `crypto-trading`
-- Build command: `pip install -r requirements.txt`
-- Start command: `uvicorn api:app --host 0.0.0.0 --port $PORT`
-- Health check: `/health`
-- Public market analysis: `/api/market?symbol=BTCUSDT&interval=1h`
-- Agent roster: `/api/agents`
-- Paid 19-agent analysis: `/api/ai-analysis?symbol=BTCUSDT&interval=1h`
-
-The 19-agent endpoint is disabled until `AI_API_KEY` or `ANTHROPIC_API_KEY` is added as a **private server-side environment variable**. One analysis can make up to 19 paid model calls. Do not place keys in the browser, GitHub source, or a public dashboard. The endpoint never places orders.
-
-## Next engineering milestones
-1. Connect the 3D handoff panel to the backend's real event stream so it shows actual model outputs, not illustrative packets.
-2. Persist each agent input/output, source, latency, token usage, and error; add a per-run cost ceiling.
-3. Extend the paper ledger with sells, stop rules, max drawdown, exposure limits, and complete fee/slippage accounting.
-4. Backtest without look-ahead bias and report drawdown, trade count, expectancy, and out-of-sample performance before interpreting returns.
-5. Run the AI pipeline only after budget approval and confirm the provider/model configuration; 19 agent calls can cost money per run.
-6. Consider real exchange execution only after extensive paper trading and explicit separate approval. If ever enabled, use least-privilege trade-only API keys, disable withdrawals, and enforce server-side risk limits.
-
-## Open the visualizer
-[Open Crypto Nexus — 3D command center](https://notbryan4real-blip.github.io/ai-business-growth-engine/crypto.html)
-
-The dashboard includes a read-only BTC/USDT public quote. Its handoff packets are illustrative; the paid backend pipeline is not yet deployed or wired into the visualizer.
