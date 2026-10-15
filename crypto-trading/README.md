@@ -24,13 +24,13 @@ Crypto Nexus is a **paper-only research system**. It evaluates simple benchmark 
 
 ## Deploy the API
 
-Use a Python web service such as Render:
+A Render blueprint is defined in the repository root render.yaml. Deploy it from Render's Blueprint flow using the repository link below. Review the proposed services carefully before confirming; the blueprint also defines the existing Growth Engine API service. Alternatively, create only a separate web service from this repository with root directory crypto-trading.\n\nUse a Python web service such as Render:
 - Root directory: crypto-trading
 - Build command: pip install -r requirements.txt
 - Start command: uvicorn api:app --host 0.0.0.0 --port $PORT
 - Health-check path: /health
 
-Add AI_API_KEY or ANTHROPIC_API_KEY as a **private server-side environment variable** only. Never place it in the HTML, browser storage, query string, or GitHub. Choose a model in AI_MODEL if desired. The AI endpoints remain disabled until a key is configured.
+The Render blueprint creates a private APP_API_TOKEN automatically to protect paid AI endpoints. Copy that token from the Render service's environment page and paste it into the research UI's token field; the page sends it only as an X-API-Token request header and does not persist it. Add AI_API_KEY or ANTHROPIC_API_KEY as a **private server-side environment variable** only when you are ready to pay for AI calls. Never place the model key in the HTML, browser storage, query string, or GitHub. Choose a model in AI_MODEL if desired. AI endpoints remain disabled until a model key is configured.
 
 ## AI test cost and interpretation
 
