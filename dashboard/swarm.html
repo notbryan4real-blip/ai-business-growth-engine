@@ -8,6 +8,64 @@
 .left{left:22px;top:105px;width:228px;padding:15px}.right{right:22px;top:105px;width:255px;padding:15px}.panelhead{display:flex;justify-content:space-between;align-items:center;color:var(--cyan);font-size:9px;letter-spacing:.18em;margin-bottom:14px}.tiny{color:var(--muted);font-size:8px;letter-spacing:.08em}.readout{display:grid;grid-template-columns:1fr 1fr;gap:8px}.stat{border-left:2px solid #2f9ba8;background:#09202c88;padding:10px 9px}.stat b{display:block;font:500 24px/1.1 system-ui,sans-serif;letter-spacing:-.04em;color:#e6fdff}.stat span{font-size:8px;color:var(--muted);letter-spacing:.1em}.section{border-top:1px solid #18364a;margin-top:13px;padding-top:12px}.meterrow{display:flex;justify-content:space-between;color:#9bb8c9;font-size:9px;margin:9px 0 5px}.meter{height:3px;background:#132b3a;overflow:hidden}.meter i{display:block;height:100%;background:linear-gradient(90deg,#247cff,var(--cyan));box-shadow:0 0 9px var(--cyan)}.agentname{font:600 21px/1.1 system-ui,sans-serif;margin:4px 0 7px;color:#f0fcff}.tag{display:inline-block;padding:4px 6px;border:1px solid #226777;color:var(--cyan);font-size:8px;letter-spacing:.12em}.desc{color:#9bb2c4;font:11px/1.6 system-ui,sans-serif;margin:12px 0}.label{font-size:8px;letter-spacing:.16em;color:var(--muted);text-transform:uppercase}.feed{display:flex;flex-direction:column;gap:9px}.feedline{font-size:9px;color:#aac3d3;display:flex;gap:8px;line-height:1.45}.dot{width:5px;height:5px;flex:0 0 5px;border-radius:50%;margin-top:4px;background:var(--green);box-shadow:0 0 7px var(--green)}.steps{display:grid;grid-template-columns:repeat(4,1fr);gap:5px}.step{padding:7px 4px;text-align:center;border:1px solid #1d394a;color:#5d7b8d;font-size:8px}.step.active{border-color:var(--cyan);color:var(--cyan);background:#0a3541;box-shadow:0 0 12px #28cbe522}.bottom{position:absolute;left:50%;bottom:18px;transform:translateX(-50%);width:min(520px,calc(100% - 36px));pointer-events:auto;text-align:center}.commandbar{display:flex;justify-content:center;gap:7px;margin-bottom:10px}button{font:9px ui-monospace,monospace;letter-spacing:.08em;color:#bdebf5;background:#061722;border:1px solid #245064;padding:10px 14px;cursor:pointer}button:hover,button.active{border-color:var(--cyan);color:var(--cyan);box-shadow:0 0 15px #39e8ff22}button.primary{background:#0b3440;border-color:var(--cyan);color:#dffcff}.hint{color:#57778a;font-size:8px;letter-spacing:.1em;text-shadow:0 1px 5px #000}.crosshair{position:absolute;left:50%;top:50%;width:44px;height:44px;transform:translate(-50%,-50%);border:1px solid #62eaff25;border-radius:50%;pointer-events:none}.crosshair:before,.crosshair:after{content:"";position:absolute;background:#62eaff55}.crosshair:before{height:1px;left:-10px;right:-10px;top:50%}.crosshair:after{width:1px;top:-10px;bottom:-10px;left:50%}.corner{position:absolute;width:24px;height:24px;border-color:#57f3ff70;border-style:solid}.tl{top:95px;left:10px;border-width:1px 0 0 1px}.tr{top:95px;right:10px;border-width:1px 1px 0 0}.bl{bottom:10px;left:10px;border-width:0 0 1px 1px}.br{bottom:10px;right:10px;border-width:0 1px 1px 0}.load{position:fixed;z-index:10;inset:0;background:#03070c;display:grid;place-items:center;text-align:center;color:var(--cyan);letter-spacing:.2em;font-size:10px}.load strong{display:block;color:#eaffff;font:500 24px system-ui,sans-serif;letter-spacing:.12em;margin-bottom:10px}.load em{display:block;color:#5e8396;font-style:normal;letter-spacing:.08em;margin-top:10px}.hide{display:none!important}
 @media(max-width:760px){.top{height:72px;padding:12px}.brand h1{font-size:14px}.reactor{width:30px;height:30px}.topright{gap:0}.clock{display:none}.left{left:10px;top:85px;width:150px;padding:10px}.right{right:10px;top:85px;width:165px;padding:10px}.panelhead{font-size:8px;margin-bottom:9px}.readout{gap:5px}.stat{padding:7px 6px}.stat b{font-size:19px}.stat span{font-size:7px}.section{margin-top:9px;padding-top:8px}.agentname{font-size:16px}.desc{font-size:10px;line-height:1.4;margin:8px 0}.feed{gap:7px}.feedline{font-size:8px}.bottom{bottom:12px}.commandbar{gap:4px}.commandbar button{padding:9px 10px;font-size:8px}.hint{font-size:7px}.crosshair{top:55%}}
 @media(max-width:390px){.left{width:132px}.right{width:145px}.brand h1{font-size:12px}.eyebrow{font-size:7px}.stat b{font-size:17px}.right .tiny{display:none}}
+
+/* Compact HUD: prioritize the 3D scene over the information panels */
+.left{left:14px;top:94px;width:174px;padding:10px;opacity:.86}
+.right{right:14px;top:94px;width:198px;padding:10px;opacity:.86}
+.panel{backdrop-filter:blur(8px);box-shadow:0 8px 24px #0005,inset 0 0 14px #0b203322}
+.panelhead{font-size:8px;margin-bottom:9px}
+.readout{gap:5px}
+.stat{padding:6px 6px}
+.stat b{font-size:19px}
+.stat span{font-size:7px;letter-spacing:.04em}
+.section{margin-top:8px;padding-top:8px}
+.meterrow{font-size:8px;margin:6px 0 4px}
+.agentname{font-size:17px}
+.desc{font-size:10px;line-height:1.45;margin:8px 0}
+.feed{gap:6px}
+.feedline{font-size:8px;line-height:1.35}
+.steps{gap:3px}
+.step{padding:5px 2px;font-size:7px}
+.label{font-size:7px}
+.tag{font-size:7px;padding:3px 5px}
+@media(max-width:760px){
+ .left{left:7px;top:81px;width:124px;padding:7px}
+ .right{right:7px;top:81px;width:137px;padding:7px}
+ .panelhead{font-size:7px;letter-spacing:.08em;margin-bottom:7px}
+ .stat{padding:5px 4px}
+ .stat b{font-size:16px}
+ .stat span{font-size:6px}
+ .section{margin-top:6px;padding-top:6px}
+ .meterrow{font-size:6px}
+ .agentname{font-size:13px}
+ .desc{font-size:9px;line-height:1.3;margin:6px 0}
+ .feedline{font-size:7px;gap:5px}
+ .tiny{font-size:6px}
+ .step{font-size:6px;padding:4px 1px}
+ .label{font-size:6px;letter-spacing:.1em}
+ .tag{font-size:6px;letter-spacing:.05em}
+ .bottom{bottom:8px}
+ .commandbar{gap:3px;margin-bottom:6px}
+ .commandbar button{padding:7px 7px;font-size:7px}
+ .hint{font-size:6px}
+}
+@media(max-width:390px){
+ .left{width:108px}
+ .right{width:120px}
+ .stat b{font-size:14px}
+ .agentname{font-size:12px}
+ .desc{font-size:8px}
+}
+/* Keep the scene dominant on shorter screens */
+@media(max-height:650px){
+ .left,.right{top:80px}
+ .left .section:nth-of-type(2){display:none}
+ .right .section:last-child{display:none}
+ .bottom{bottom:6px}
+ .commandbar{margin-bottom:4px}
+ .commandbar button{padding:6px 8px}
+}
+
 </style>
 <script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.166.1/build/three.module.js"}}</script>
 </head><body><div id="loading" class="load"><div><strong>GROWTH ENGINE</strong>INITIALIZING HOLOGRAPHIC CORE<em>ESTABLISHING 3D NEURAL MESH...</em></div></div><div id="scene"></div>
