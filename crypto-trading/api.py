@@ -31,8 +31,9 @@ def backtest(symbol: str=Query(default="BTCUSDT",max_length=20), interval: str=Q
     except (ValueError,MarketDataError) as exc: raise HTTPException(status_code=400,detail=str(exc))
 
 @app.get("/api/ai-analysis")
-def ai_analysis(symbol: str=Query(default="BTCUSDT",max_length=20), interval: str=Query(default="1h")):
+def ai_analysis(symbol: str=Query(default="BTCUSDT",max_length=20), interval: str=Query(default="1h"), x_api_token: str | None=Header(default=None)):
     """Run 19 paid specialist calls on current data. Analysis only; never trades."""
+    require_ai_access(x_api_token)
     if not (os.getenv("AI_API_KEY") or os.getenv("ANTHROPIC_API_KEY")):
         raise HTTPException(status_code=503,detail="AI API is not configured. Add a private server-side AI_API_KEY only when ready to fund model usage.")
     try:
@@ -42,8 +43,9 @@ def ai_analysis(symbol: str=Query(default="BTCUSDT",max_length=20), interval: st
     except RuntimeError as exc: raise HTTPException(status_code=502,detail=str(exc))
 
 @app.get("/api/ai-backtest")
-def ai_backtest(symbol: str=Query(default="BTCUSDT",max_length=20), interval: str=Query(default="1h"), limit: int=Query(default=500,ge=180,le=1000), samples: int=Query(default=3,ge=1,le=10), horizon: int=Query(default=6,ge=1,le=48), fee_bps: int=Query(default=10,ge=0,le=100), slippage_bps: int=Query(default=5,ge=0,le=100)):
+def ai_backtest(symbol: str=Query(default="BTCUSDT",max_length=20), interval: str=Query(default="1h"), limit: int=Query(default=500,ge=180,le=1000), samples: int=Query(default=3,ge=1,le=10), horizon: int=Query(default=6,ge=1,le=48), fee_bps: int=Query(default=10,ge=0,le=100), slippage_bps: int=Query(default=5,ge=0,le=100), x_api_token: str | None=Header(default=None)):
     """Bounded historical AI test. Each sample invokes 19 paid model calls; defaults to 57 calls."""
+    require_ai_access(x_api_token)
     if not (os.getenv("AI_API_KEY") or os.getenv("ANTHROPIC_API_KEY")):
         raise HTTPException(status_code=503,detail="AI API is not configured. Set a private server-side AI_API_KEY first. No key should be put in the browser or GitHub.")
     try:
