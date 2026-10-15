@@ -1,10 +1,19 @@
 from agents.runtime import AGENTS, run_specialists
 
 
-def test_specialist_catalog_has_distinct_roles():
+EXPECTED_AGENT_IDS = {
+    "orchestrator", "market", "discovery", "verification", "competitive",
+    "qualification", "audit", "website", "copywriting", "pricing",
+    "sales_intel", "outreach", "project", "customer_success", "automation",
+    "finance", "qa", "offer", "sales",
+}
+
+
+def test_specialist_catalog_has_19_distinct_roles():
     ids = [agent["id"] for agent in AGENTS]
+    assert len(ids) == 19
     assert len(ids) == len(set(ids))
-    assert {"qualification", "market", "audit", "offer", "sales", "qa"} == set(ids)
+    assert set(ids) == EXPECTED_AGENT_IDS
 
 
 def test_runtime_rejects_unknown_agents_before_provider_call():
