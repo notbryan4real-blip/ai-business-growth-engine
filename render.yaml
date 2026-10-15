@@ -7,8 +7,6 @@ services:
     startCommand: uvicorn app:app --host 0.0.0.0 --port $PORT
     healthCheckPath: /api/health
     envVars:
-      - key: AI_API_KEY
-        sync: false
       - key: APP_API_TOKEN
         generateValue: true
       - key: AI_MODEL
