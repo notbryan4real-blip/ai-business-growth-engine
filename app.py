@@ -90,7 +90,7 @@ class DiscoveryInput(BaseModel):
 
 @app.post("/api/discovery/search")
 def discover_businesses(request: DiscoveryInput, authorization: str | None = Header(default=None)):
-    """Discover candidate businesses through the configured Google Places API."""
+    """Search Google Places; persist only place IDs, not restricted Places content."""
     require_api_token(authorization)
     try:
         candidates = search_places(request.query, max_results=request.max_results)
@@ -99,30 +99,12 @@ def discover_businesses(request: DiscoveryInput, authorization: str | None = Hea
     except ValueError as exc:
         raise HTTPException(status_code=422, detail=str(exc)) from exc
 
-    created: list[dict[str, Any]] = []
-    duplicates = 0
+    results: list[dict[str, Any]] = []
     with LOCK:
         store = read_store()
-        existing = store.setdefault("prospects", [])
+        saved_ids = set(store.get("google_place_ids", []))
         for item in candidates:
-            provider_id = item.get("provider_id")
-            source_url = item.get("source_url")
-            name_key = (item.get("business_name") or "").strip().casefold()
-            location_key = (item.get("location") or "").strip().casefold()
-            duplicate = any(
-                (provider_id and row.get("provider_id") == provider_id)
-                or (source_url and row.get("source_url") == source_url)
-                or (
-                    name_key
-                    and location_key
-                    and name_key == (row.get("business_name") or "").strip().casefold()
-                    and location_key == (row.get("location") or "").strip().casefold()
-                )
-                for row in existing
-            )
-            if duplicate:
-                duplicates += 1
-                continue
+            place_id = item.get("place_id")
             model = Prospect(
                 business_name=item["business_name"],
                 category=item.get("category"),
@@ -133,31 +115,32 @@ def discover_businesses(request: DiscoveryInput, authorization: str | None = Hea
                 rating=item.get("rating"),
                 review_count=item.get("review_count", 0),
                 source=item.get("source"),
-                source_url=source_url,
+                source_url=item.get("source_url"),
             )
             score = score_prospect(model)
-            record = {
+            results.append({
                 **item,
-                "id": uuid.uuid4().hex,
                 "opportunity_score": score.total,
                 "score_factors": score.factors,
-                "stage": "research",
-                "discovery_query": request.query,
-                "discovered_at": datetime.now(timezone.utc).isoformat(),
-            }
-            existing.append(record)
-            created.append(record)
+                "previously_seen": bool(place_id and place_id in saved_ids),
+            })
+            if place_id:
+                saved_ids.add(place_id)
+        # Google Places place IDs are exempt from caching restrictions; do not
+        # persist names, addresses, phones, ratings, URLs, or other Places content.
+        store["google_place_ids"] = sorted(saved_ids)
         write_store(store)
+
     return {
         "status": "completed",
         "provider": "google_places",
         "query": request.query,
-        "results_returned": len(candidates),
-        "prospects_created": len(created),
-        "duplicates_skipped": duplicates,
-        "website_absence_verified": False,
-        "prospects": created,
-        "notice": "A missing website URL in Google Places is unverified, not proof that the business has no website.",
+        "results_returned": len(results),
+        "place_ids_retained": len(saved_ids),
+        "results_are_transient": True,
+        "prospects": results,
+        "attribution": "Google Maps",
+        "notice": "Results are live and are not saved as prospect records. A missing website URL in Places is unverified, not proof that the business has no website. Verify facts independently before adding a prospect to the CRM.",
     }
 
 
