@@ -32,9 +32,10 @@ API routes:
 - `GET /api/agents` — specialist-agent catalog
 - `GET /api/prospects` — stored prospect and run records
 - `POST /api/prospects` — score and save a prospect
+- `POST /api/discovery/search` — discover and deduplicate candidate businesses with Google Places API (New); requires `BUSINESS_DATA_API_KEY` and the API bearer token
 - `POST /api/agents/run` — run selected specialist agents in sequence
 
-Set `AI_API_KEY` to an Anthropic API key in the hosting environment. Set `AI_MODEL` to a model enabled for that account; default: `claude-haiku-4-5`. The Render blueprint generates `APP_API_TOKEN` automatically; copy its value from the Render environment settings into the dashboard's session-only token field. Mutating endpoints and agent runs require `Authorization: Bearer <APP_API_TOKEN>`. Never put either secret in source control or commit it to browser-side JavaScript.
+Set `AI_API_KEY` to an Anthropic API key in the hosting environment. For live business discovery, set `BUSINESS_DATA_API_KEY` to a server-restricted Google Maps Platform key with Places API (New) enabled; `GOOGLE_MAPS_API_KEY` is also accepted. Set `AI_MODEL` to a model enabled for that account; default: `claude-haiku-4-5`. The Render blueprint generates `APP_API_TOKEN` automatically; copy its value from the Render environment settings into the dashboard's session-only token field. Mutating endpoints and agent runs require `Authorization: Bearer <APP_API_TOKEN>`. Never put either secret in source control or commit it to browser-side JavaScript.
 
 Example agent request:
 
@@ -55,13 +56,14 @@ Example agent request:
 
 - **Dashboard:** deployed successfully through GitHub Pages.
 - **Deploy the API:** [Open the Render Blueprint deployment](https://render.com/deploy?repo=https://github.com/notbryan4real-blip/ai-business-growth-engine). In Render, review and deploy the blueprint, then set `AI_API_KEY` to an Anthropic API key and set `APP_API_TOKEN` to a strong private token. Do not paste secrets into GitHub files or the public dashboard. After deployment, use the service's `onrender.com` URL as the dashboard's API base URL; test `/api/health` before running agents. Deployment workflow: https://github.com/notbryan4real-blip/ai-business-growth-engine/actions/runs/38516537524
+- **Google Places discovery:** implementation is in the `feat/google-places-discovery` branch and requires a configured Google Maps Platform API key before live searches can run.
 - **AI API:** not yet deployed or verified live. The Render blueprint is ready, but no active Render connection/service was available in the current workflow. The API also requires an authorized AI-provider key and a private `APP_API_TOKEN`.
 - **Persistence:** the API currently writes to a JSON file. Typical free web instances may sleep and may not preserve local files, so use a managed database or persistent volume before relying on it for ongoing business records.
 - **Cloudflare:** the connected integration currently fails authentication, so no deployment was made there.
 
 ## Evidence and safety
 
-- The specialist agents analyze only the evidence submitted in a run. They do not claim to browse the web, scrape Google, verify business facts, or contact prospects.
+- The Google Places adapter treats a missing website field as `not_listed_unverified`, not as proof that no website exists. The scoring engine awards the no-website factor only when absence is independently confirmed. The specialist agents analyze only the evidence submitted in a run. They do not claim to browse the web, scrape Google, verify business facts, or contact prospects.
 - No messages are sent automatically. Human review is required before outreach.
 - Scores are transparent heuristics, not probabilities of a sale.
 - Never commit API keys or other secrets.
