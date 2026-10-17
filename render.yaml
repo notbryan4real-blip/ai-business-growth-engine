@@ -9,6 +9,10 @@ services:
     envVars:
       - key: APP_API_TOKEN
         generateValue: true
+      - key: AI_API_KEY
+        sync: false
+      - key: BUSINESS_DATA_API_KEY
+        sync: false
       - key: AI_MODEL
         value: claude-haiku-4-5
       - key: CORS_ORIGINS
