@@ -11,7 +11,6 @@ from agents.runtime import AGENTS, AgentRuntimeError, run_specialists
 from agents.prospecting.models import Prospect
 from agents.qualification.scoring import score_prospect
 from agents.prospecting.google_places import PlacesDiscoveryError, search_places
-from agents.prospecting.google_places import PlacesDiscoveryError, search_places
 
 DATA_PATH = Path(os.getenv("GROWTH_ENGINE_DATA_PATH", "data/runtime_store.json"))
 LOCK = Lock()
@@ -116,83 +115,6 @@ def discover_businesses(request: DiscoveryInput, authorization: str | None = Hea
                 or (
                     name_key
                     and location_key
-                    and name_key == (row.get("business_name") or "").strip().casefold()
-                    and location_key == (row.get("location") or "").strip().casefold()
-                )
-                for row in existing
-            )
-            if duplicate:
-                duplicates += 1
-                continue
-            model = Prospect(
-                business_name=item["business_name"],
-                category=item.get("category"),
-                location=item.get("location"),
-                phone=item.get("phone"),
-                website_url=item.get("website_url"),
-                website_status=item.get("website_status", "not_listed_unverified"),
-                rating=item.get("rating"),
-                review_count=item.get("review_count", 0),
-                source=item.get("source"),
-                source_url=source_url,
-            )
-            score = score_prospect(model)
-            record = {
-                **item,
-                "id": uuid.uuid4().hex,
-                "opportunity_score": score.total,
-                "score_factors": score.factors,
-                "stage": "research",
-                "discovery_query": request.query,
-                "discovered_at": datetime.now(timezone.utc).isoformat(),
-            }
-            existing.append(record)
-            created.append(record)
-        write_store(store)
-    return {
-        "status": "completed",
-        "provider": "google_places",
-        "query": request.query,
-        "results_returned": len(candidates),
-        "prospects_created": len(created),
-        "duplicates_skipped": duplicates,
-        "website_absence_verified": False,
-        "prospects": created,
-        "notice": "A missing website URL in Google Places is unverified, not proof that the business has no website.",
-    }
-
-
-class DiscoveryInput(BaseModel):
-    query: str = Field(min_length=3, max_length=300)
-    max_results: int = Field(default=10, ge=1, le=20)
-
-
-@app.post("/api/discovery/search")
-def discover_businesses(request: DiscoveryInput, authorization: str | None = Header(default=None)):
-    """Discover candidate businesses through the configured Google Places API."""
-    require_api_token(authorization)
-    try:
-        candidates = search_places(request.query, max_results=request.max_results)
-    except PlacesDiscoveryError as exc:
-        raise HTTPException(status_code=503, detail=str(exc)) from exc
-    except ValueError as exc:
-        raise HTTPException(status_code=422, detail=str(exc)) from exc
-
-    created: list[dict[str, Any]] = []
-    duplicates = 0
-    with LOCK:
-        store = read_store()
-        existing = store.setdefault("prospects", [])
-        for item in candidates:
-            provider_id = item.get("provider_id")
-            source_url = item.get("source_url")
-            name_key = (item.get("business_name") or "").strip().casefold()
-            location_key = (item.get("location") or "").strip().casefold()
-            duplicate = any(
-                (provider_id and row.get("provider_id") == provider_id)
-                or (source_url and row.get("source_url") == source_url)
-                or (
-                    name_key and location_key
                     and name_key == (row.get("business_name") or "").strip().casefold()
                     and location_key == (row.get("location") or "").strip().casefold()
                 )
