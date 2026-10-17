@@ -11,6 +11,7 @@ from agents.runtime import AGENTS, AgentRuntimeError, run_specialists
 from agents.prospecting.models import Prospect
 from agents.qualification.scoring import score_prospect
 from agents.prospecting.google_places import PlacesDiscoveryError, search_places
+from agents.audit.website import WebsiteAuditError, audit_website
 
 DATA_PATH = Path(os.getenv("GROWTH_ENGINE_DATA_PATH", "data/runtime_store.json"))
 LOCK = Lock()
@@ -142,6 +143,22 @@ def discover_businesses(request: DiscoveryInput, authorization: str | None = Hea
         "attribution": "Google Maps",
         "notice": "Results are live and are not saved as prospect records. A missing website URL in Places is unverified, not proof that the business has no website. Verify facts independently before adding a prospect to the CRM.",
     }
+
+
+class WebsiteAuditInput(BaseModel):
+    url: str = Field(min_length=8, max_length=2000)
+
+
+@app.post("/api/audit/website")
+def audit_public_website(request: WebsiteAuditInput, authorization: str | None = Header(default=None)):
+    """Run a bounded static HTML audit of a publicly accessible website."""
+    require_api_token(authorization)
+    try:
+        return audit_website(request.url)
+    except WebsiteAuditError as exc:
+        raise HTTPException(status_code=502, detail=str(exc)) from exc
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail="Invalid website URL.") from exc
 
 
 class ApprovalInput(BaseModel):
