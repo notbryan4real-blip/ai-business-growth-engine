@@ -56,7 +56,8 @@ Example agent request:
 
 - **Dashboard:** deployed successfully through GitHub Pages.
 - **Deploy the API:** [Open the Render Blueprint deployment](https://render.com/deploy?repo=https://github.com/notbryan4real-blip/ai-business-growth-engine). In Render, review and deploy the blueprint, then set `AI_API_KEY` to an Anthropic API key and set `APP_API_TOKEN` to a strong private token. Do not paste secrets into GitHub files or the public dashboard. After deployment, use the service's `onrender.com` URL as the dashboard's API base URL; test `/api/health` before running agents. Deployment workflow: https://github.com/notbryan4real-blip/ai-business-growth-engine/actions/runs/38516537524
-- **Google Places discovery:** implementation is in the `feat/google-places-discovery` branch and requires a configured Google Maps Platform API key before live searches can run.
+- **Google Places discovery:** implementation is proposed in [PR #7](https://github.com/notbryan4real-blip/ai-business-growth-engine/pull/7); it is not live on the deployed dashboard until merged, deployed, and configured with a Google Maps Platform API key.
+- **Legal readiness:** draft Terms and Privacy pages are included, but operator contact details still need to be supplied before enabling Google Places for public production use.
 - **AI API:** not yet deployed or verified live. The Render blueprint is ready, but no active Render connection/service was available in the current workflow. The API also requires an authorized AI-provider key and a private `APP_API_TOKEN`.
 - **Persistence:** the API currently writes to a JSON file. Typical free web instances may sleep and may not preserve local files, so use a managed database or persistent volume before relying on it for ongoing business records.
 - **Cloudflare:** the connected integration currently fails authentication, so no deployment was made there.
