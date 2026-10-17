@@ -80,7 +80,7 @@ document.getElementById('discoveryForm').addEventListener('submit',async e=>{
   const data=await response.json();if(!response.ok)throw new Error(data.detail||('API error '+response.status));
   const candidates=data.prospects||[];
   resultsBox.innerHTML=candidates.length?candidates.map(item=>{
-   const website=item.website_url&&/^https?:\/\//i.test(item.website_url)?'<a href="'+esc(item.website_url)+'" target="_blank" rel="noopener">Website listed</a>':'<span class="pill warn">Website not listed · unverified</span>';
+   const website=item.website_url&&/^https?:\/\//i.test(item.website_url)?'<a href="'+esc(item.website_url)+'" target="_blank" rel="noopener">Website listed</a>':'<span class="pill warn">Website not checked · verify independently</span>';
    const map=item.source_url&&/^https?:\/\//i.test(item.source_url)?'<a href="'+esc(item.source_url)+'" target="_blank" rel="noopener">Open on Google Maps</a>':'Google Maps result';
    const rating=item.rating!=null?' · '+esc(String(item.rating))+'/5 ('+esc(String(item.review_count||0))+' reviews)':'';
    return '<div class="prospect"><div style="min-width:0"><div class="name">'+esc(item.business_name||'Business')+'</div><div class="meta">'+esc([item.category,item.location].filter(Boolean).join(' · '))+rating+'</div><div class="row" style="flex-wrap:wrap;margin-top:7px">'+website+' · '+map+'</div><div class="meta">'+esc(item.phone||'No phone returned')+'</div></div><div class="score">'+Number(item.opportunity_score||0)+'</div></div>'
