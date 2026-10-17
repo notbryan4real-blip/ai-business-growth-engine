@@ -26,6 +26,13 @@ It is not yet a fully autonomous agency. Website crawling, publishing to custome
 5. Results are temporary and displayed with Google Maps attribution. The backend retains place IDs only. A missing website field is not proof that a business has no website.
 6. Verify prospects independently using authorized sources before creating permanent CRM records or making claims in outreach.
 
+## Website audit
+
+1. In **AI Agent Lab**, enter the API base URL and bearer token.
+2. Enter a public business website URL under **Live website audit**.
+3. Run the audit and review the reported HTML signals and findings. The page content is not stored.
+4. Treat results as a limited static HTML inspection, not a full browser, Lighthouse, accessibility, or SEO certification. Missing signals can be caused by JavaScript-rendered content.
+
 ## AI API configuration
 
 Set `AI_API_KEY` to an authorized Anthropic API key in the backend environment. Set `AI_MODEL` to a model available to the account. The current specialist runtime makes sequential model calls using supplied evidence; it does not browse the web or perform external actions.
