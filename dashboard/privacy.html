@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Growth Engine — Privacy Policy</title>
+<style>body{font:16px/1.65 system-ui,sans-serif;max-width:850px;margin:0 auto;padding:24px;color:#18251e}h1,h2{line-height:1.2}a{color:#176b3b}.notice{padding:14px;border:1px solid #d6a343;background:#fff8e6;border-radius:10px}</style>
+</head>
+<body>
+<p><a href="./index.html">← Growth Engine dashboard</a></p>
+<h1>Privacy Policy</h1>
+<p>Last updated: October 17, 2026</p>
+<p class="notice"><strong>Production setup required:</strong> The operator must add a valid privacy-request contact channel and review this policy before enabling public production use of Google Places data or accepting external users.</p>
+<h2>Information processed</h2>
+<p>The application may process business prospect information entered by the user, notes and observations, generated drafts, task and agent outputs, and manually entered sales or revenue records. Do not enter passwords, payment-card details, or sensitive personal information into prospect notes or AI prompts.</p>
+<h2>Browser storage</h2>
+<p>The dashboard stores its workspace in the browser's local storage and can export a JSON backup. This information remains in that browser until it is cleared or the user removes it. Anyone with access to the unlocked browser profile may be able to view it.</p>
+<h2>Server storage</h2>
+<p>The API stores prospect records and AI run outputs in its configured data store. The current MVP may use a local JSON file on the hosting instance; availability and retention are not guaranteed across hosting restarts. The operator should configure durable storage and a retention process before relying on the service for business-critical information.</p>
+<h2>Google Maps Platform</h2>
+<p>Google Places search results are displayed temporarily with Google Maps attribution. The application retains only Google Places place IDs for repeat-search tracking; it does not intentionally persist returned names, addresses, phone numbers, ratings, or website URLs. Use of Google Maps Platform is subject to the <a href="https://policies.google.com/privacy">Google Privacy Policy</a>, <a href="https://cloud.google.com/maps-platform/terms">Google Maps Platform Terms of Service</a>, and <a href="https://developers.google.com/maps/documentation/places/web-service/policies">Places API policies</a>.</p>
+<h2>AI and other providers</h2>
+<p>If AI features are configured, the selected AI provider receives the request content required to generate a response. Review that provider's privacy terms and avoid submitting information that is not necessary. Other connected services may process data according to their own privacy policies.</p>
+<h2>Sharing and security</h2>
+<p>The application does not intentionally sell user-entered prospect records. Data may be processed by configured hosting and service providers to operate requested features. Secrets should be kept in server-side environment variables, never in public source files or browser code. No internet-connected application can guarantee absolute security.</p>
+<h2>Retention and requests</h2>
+<p>Browser records persist until cleared or overwritten. Server-side records persist according to the configured storage and retention process. Contact the operator to request access, correction, or deletion where applicable.</p>
+<h2>Operator contact</h2>
+<p>Operator contact details have not yet been configured. This section must be completed before public production use.</p>
+</body></html>
