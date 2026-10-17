@@ -24,6 +24,11 @@
 <div class="field full"><div id="discoveryStatus" class="sub">Requires Google Places API configured on the backend. Results are temporary and are not saved as CRM records.</div></div>
 <div class="field full"><div class="sub" style="font-weight:800">Google Maps attribution · live results only</div><div id="discoveryResults" class="stack"></div></div>
 </form>
+<form id="websiteAuditForm" class="formgrid" style="margin-top:14px;padding:12px;border:1px solid var(--line);border-radius:14px">
+<div class="field full"><label>Live website audit (public HTML only)</label><input id="websiteAuditUrl" type="url" required placeholder="https://business.example"></div>
+<div class="field full"><button id="websiteAuditBtn" class="btn" type="submit">Audit website</button></div>
+<div class="field full"><div id="websiteAuditStatus" class="sub">Checks a bounded HTML response for title, metadata, mobile viewport, headings, forms, calls to action, and image alt text. No page content is stored.</div><div id="websiteAuditResults" class="stack"></div></div>
+</form>
 <form id="agentForm" class="formgrid" style="margin-top:14px"><div class="field full"><label>API base URL</label><input id="agentApiUrl" type="url" placeholder="https://your-api-host.example.com" required></div><div class="field full"><label>API access token (session only)</label><input id="agentApiToken" type="password" autocomplete="off" required></div><div class="field full"><label>Business name *</label><input id="agentBusiness" required></div><div class="field"><label>Industry</label><input id="agentIndustry"></div><div class="field"><label>Location</label><input id="agentLocation" placeholder="Alpharetta, GA"></div><div class="field full"><label>Official website URL, if verified</label><input id="agentWebsite" type="url" placeholder="https://…"></div><div class="field full"><label>Verified observations / notes</label><textarea id="agentEvidence" placeholder="Only enter facts you have actually checked."></textarea></div><div class="field full"><label>Agents to run</label><div class="stack" style="grid-template-columns:repeat(2,minmax(0,1fr));display:grid"><label class="checkrow"><input type="checkbox" name="agentIds" value="qualification" checked>Qualification</label><label class="checkrow"><input type="checkbox" name="agentIds" value="market" checked>Market intelligence</label><label class="checkrow"><input type="checkbox" name="agentIds" value="audit" checked>Digital audit</label><label class="checkrow"><input type="checkbox" name="agentIds" value="offer" checked>Offer strategy</label><label class="checkrow"><input type="checkbox" name="agentIds" value="sales" checked>Sales draft</label><label class="checkrow"><input type="checkbox" name="agentIds" value="qa" checked>Quality assurance</label></div></div><div class="field full"><button id="runAgentsBtn" class="btn primary" type="submit">Run selected agents</button></div></form></div><div class="panel"><div class="panel-head"><div><h3>Run report</h3><div id="agentRunStatus" class="sub">API not connected yet.</div></div><button id="copyAgentOutput" class="btn small" type="button">Copy</button></div><div id="agentOutput" class="draft">No agent run yet.</div></div></div></section>
 <section id="view-approvals" class="view hidden"><div class="layout">
 <div class="panel"><div class="panel-head"><div><h3>Approval queue</h3><div id="approvalStatus" class="sub">Connect the API to load pending decisions.</div></div><button id="refreshApprovals" class="btn small" type="button">Refresh</button></div><div id="approvalList" class="stack"><div class="empty">No approval records loaded.</div></div></div>
@@ -123,6 +128,21 @@ document.getElementById('submitDraftApproval').onclick=async()=>{
   toast('Draft submitted to approval queue');go('approvals');
  }catch(err){toast('Submission failed: '+err.message)}
 };
+document.getElementById('websiteAuditForm').addEventListener('submit',async e=>{
+ e.preventDefault();
+ const base=agentApiUrl.value.trim().replace(/\/$/,''),token=agentApiToken.value.trim(),url=document.getElementById('websiteAuditUrl').value.trim(),btn=document.getElementById('websiteAuditBtn'),status=document.getElementById('websiteAuditStatus'),results=document.getElementById('websiteAuditResults');
+ if(!base||!token){toast('Enter API URL and token in AI Agent Lab first');return}
+ btn.disabled=true;btn.textContent='Auditing…';status.textContent='Fetching a bounded public HTML response…';results.innerHTML='';
+ try{
+  const response=await fetch(base+'/api/audit/website',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+token},body:JSON.stringify({url})});
+  const data=await response.json();if(!response.ok)throw new Error(data.detail||('API error '+response.status));
+  const s=data.signals||{},findings=data.findings||[];
+  results.innerHTML='<div class="note"><b>'+esc(s.title||'No title detected')+'</b><div class="meta">HTTP '+esc(String(data.http_status))+' · '+esc(String(data.html_bytes_analyzed))+' bytes analyzed · '+esc(String(s.h1_count))+' H1 · '+esc(String(s.form_count))+' forms · '+esc(String(s.cta_label_count))+' labeled CTAs</div><div class="meta">Meta description: '+esc(s.meta_description||'Not detected')+'</div></div>'+(findings.length?findings.map(item=>'<div class="prospect"><div><span class="pill '+(item.severity==='warning'?'warn':'')+'">'+esc(item.severity)+'</span><div class="name">'+esc(item.signal)+'</div><div class="meta">'+esc(item.detail)+'</div></div></div>').join(''):'<div class="note">No issues detected by these limited static checks.</div>')+'<div class="meta">'+(data.limitations||[]).map(esc).join(' ')+'</div>';
+  status.textContent='Audit completed for '+data.final_url+'. Findings describe the fetched HTML only, not a full browser or Lighthouse audit.';
+  toast('Website audit completed');
+ }catch(err){status.textContent='Audit failed: '+err.message;toast('Website audit failed')}
+ finally{btn.disabled=false;btn.textContent='Audit website'}
+});
 document.getElementById('copyAgentOutput').onclick=async()=>{try{await navigator.clipboard.writeText(agentOutput.textContent);toast('Report copied')}catch(e){toast('Select and copy report manually')}};
 render();
 </script></body></html>
