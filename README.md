@@ -18,6 +18,7 @@ The static dashboard is published on GitHub Pages. Its browser-local workspace s
 - `demos/shiraz-plumbing/index.html`: existing customer-facing website demo.
 - `docs/prospects/shiraz-plumbing-audit.md`: existing audit notes.
 - `docs/user-manual.md`: current phone-first operation, setup, troubleshooting, and release checklist.
+- `docs/architecture/website-audit.md`: scope, safety controls, and limitations for live website audits.
 
 ## Run the API
 
@@ -34,6 +35,7 @@ API routes:
 - `GET /api/prospects` — stored prospect and run records
 - `POST /api/prospects` — score and save a prospect
 - `POST /api/discovery/search` — search live candidates with Google Places API (New); requires `BUSINESS_DATA_API_KEY` and the API bearer token; results are transient and only place IDs are retained
+- `POST /api/audit/website` — bounded static HTML audit of a public website; does not store page content
 - `GET /api/approvals`, `POST /api/approvals`, `PATCH /api/approvals/{id}` — authenticated, persistent approval queue and dashboard review controls; decisions do not execute external actions
 - `POST /api/agents/run` — run selected specialist agents in sequence
 
