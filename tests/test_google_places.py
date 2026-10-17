@@ -20,30 +20,27 @@ class FakeResponse:
         return json.dumps(self.payload).encode("utf-8")
 
 
-def test_missing_website_is_not_claimed_as_confirmed_missing():
+def test_normalizes_places_without_enterprise_fields_and_keeps_website_unknown():
     payload = {"places": [{
-        "id": "places/123",
+        "id": "place-id-123",
         "displayName": {"text": "Example Plumbing"},
         "primaryTypeDisplayName": {"text": "Plumber"},
         "formattedAddress": "Alpharetta, GA",
-        "rating": 4.7,
-        "userRatingCount": 48,
         "googleMapsUri": "https://maps.google.com/?q=example",
     }]}
     with patch("urllib.request.urlopen", return_value=FakeResponse(payload)) as mocked:
         result = search_places("plumbers in Alpharetta GA", api_key="test-key")
+
     assert result[0]["business_name"] == "Example Plumbing"
+    assert result[0]["place_id"] == "place-id-123"
     assert result[0]["website_url"] is None
-    assert result[0]["website_status"] == "not_listed_unverified"
-    assert "absence is unverified" in result[0]["verification_note"]
+    assert result[0]["website_status"] == "unknown"
+    assert "verify independently" in result[0]["verification_note"]
     assert mocked.call_args.args[0].get_header("X-goog-fieldmask") == FIELD_MASK
-
-
-def test_website_url_is_marked_listed():
-    payload = {"places": [{"displayName": {"text": "Example"}, "websiteUri": "https://example.com"}]}
-    with patch("urllib.request.urlopen", return_value=FakeResponse(payload)):
-        result = search_places("Example business", api_key="test-key")
-    assert result[0]["website_status"] == "listed"
+    assert "places.websiteUri" not in FIELD_MASK
+    assert "places.nationalPhoneNumber" not in FIELD_MASK
+    assert "places.rating" not in FIELD_MASK
+    assert "places.userRatingCount" not in FIELD_MASK
 
 
 def test_missing_api_key_is_actionable():
