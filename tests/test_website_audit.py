@@ -64,7 +64,7 @@ def test_audit_extracts_observable_html_signals_without_claiming_full_site_cover
 
 
 def test_audit_blocks_loopback_before_fetching():
-    with pytest.raises(WebsiteAuditError, match="Local and private"):
+    with pytest.raises(WebsiteAuditError, match="Private, loopback"):
         audit_website("http://127.0.0.1/admin")
 
 
@@ -77,7 +77,7 @@ def test_audit_blocks_private_dns_results():
 
 def test_audit_rejects_non_html_responses():
     response = FakeResponse("not html")
-    response.headers["Content-Type"] = "application/json"
+    response.headers.replace_header("Content-Type", "application/json")
     with patch("socket.getaddrinfo", side_effect=_public_dns), patch(
         "urllib.request.build_opener", return_value=FakeOpener(response)
     ):
