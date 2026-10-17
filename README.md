@@ -13,7 +13,7 @@ The static dashboard is published on GitHub Pages. Its browser-local workspace s
 - `dashboard/index.html`: mobile-first command center for prospect records, transparent scoring, sales drafts, pipeline tracking, revenue logging, and JSON backup.
 - `app.py`: FastAPI service for prospect scoring and protected specialist-agent runs.
 - `agents/runtime.py`: six role-specific agents — Opportunity Qualification, Market Intelligence, Digital Presence Audit, Offer Strategist, Sales Drafting, and Quality Assurance. Each specialist is a separate Anthropic model invocation; outputs are passed forward sequentially and saved with a run ID.
-- `tests/test_scoring.py` and `tests/test_runtime.py`: automated regression tests.
+- `tests/`: automated regression tests for scoring, agent runtime, Google Places discovery, and approval decisions.
 - `render.yaml`: deployment blueprint for the API on Render's free tier.
 - `demos/shiraz-plumbing/index.html`: existing customer-facing website demo.
 - `docs/prospects/shiraz-plumbing-audit.md`: existing audit notes.
@@ -33,6 +33,7 @@ API routes:
 - `GET /api/prospects` — stored prospect and run records
 - `POST /api/prospects` — score and save a prospect
 - `POST /api/discovery/search` — search live candidates with Google Places API (New); requires `BUSINESS_DATA_API_KEY` and the API bearer token; results are transient and only place IDs are retained
+- `GET /api/approvals`, `POST /api/approvals`, `PATCH /api/approvals/{id}` — authenticated, persistent approval queue; decisions do not execute external actions
 - `POST /api/agents/run` — run selected specialist agents in sequence
 
 Set `AI_API_KEY` to an Anthropic API key in the hosting environment. For live business discovery, set `BUSINESS_DATA_API_KEY` to a server-restricted Google Maps Platform key with Places API (New) enabled; `GOOGLE_MAPS_API_KEY` is also accepted. Set `AI_MODEL` to a model enabled for that account; default: `claude-haiku-4-5`. The Render blueprint generates `APP_API_TOKEN` automatically; copy its value from the Render environment settings into the dashboard's session-only token field. Mutating endpoints and agent runs require `Authorization: Bearer <APP_API_TOKEN>`. Never put either secret in source control or commit it to browser-side JavaScript.
