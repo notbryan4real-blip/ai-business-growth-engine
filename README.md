@@ -33,7 +33,7 @@ API routes:
 - `GET /api/prospects` — stored prospect and run records
 - `POST /api/prospects` — score and save a prospect
 - `POST /api/discovery/search` — search live candidates with Google Places API (New); requires `BUSINESS_DATA_API_KEY` and the API bearer token; results are transient and only place IDs are retained
-- `GET /api/approvals`, `POST /api/approvals`, `PATCH /api/approvals/{id}` — authenticated, persistent approval queue; decisions do not execute external actions
+- `GET /api/approvals`, `POST /api/approvals`, `PATCH /api/approvals/{id}` — authenticated, persistent approval queue and dashboard review controls; decisions do not execute external actions
 - `POST /api/agents/run` — run selected specialist agents in sequence
 
 Set `AI_API_KEY` to an Anthropic API key in the hosting environment. For live business discovery, set `BUSINESS_DATA_API_KEY` to a server-restricted Google Maps Platform key with Places API (New) enabled; `GOOGLE_MAPS_API_KEY` is also accepted. Set `AI_MODEL` to a model enabled for that account; default: `claude-haiku-4-5`. The Render blueprint generates `APP_API_TOKEN` automatically; copy its value from the Render environment settings into the dashboard's session-only token field. Mutating endpoints and agent runs require `Authorization: Bearer <APP_API_TOKEN>`. Never put either secret in source control or commit it to browser-side JavaScript.
@@ -57,7 +57,7 @@ Example agent request:
 
 - **Dashboard:** deployed successfully through GitHub Pages.
 - **Deploy the API:** [Open the Render Blueprint deployment](https://render.com/deploy?repo=https://github.com/notbryan4real-blip/ai-business-growth-engine). In Render, review and deploy the blueprint, then set `AI_API_KEY` to an Anthropic API key and set `APP_API_TOKEN` to a strong private token. Do not paste secrets into GitHub files or the public dashboard. After deployment, use the service's `onrender.com` URL as the dashboard's API base URL; test `/api/health` before running agents. Deployment workflow: https://github.com/notbryan4real-blip/ai-business-growth-engine/actions/runs/38516537524
-- **Google Places discovery:** implementation is proposed in [PR #7](https://github.com/notbryan4real-blip/ai-business-growth-engine/pull/7); it is not live on the deployed dashboard until merged, deployed, and configured with a Google Maps Platform API key.
+- **Google Places discovery:** implementation is proposed in [PR #8](https://github.com/notbryan4real-blip/ai-business-growth-engine/pull/8); it is not live on the deployed dashboard until merged, deployed, and configured with a Google Maps Platform API key.
 - **Legal readiness:** draft Terms and Privacy pages are included, but operator contact details still need to be supplied before enabling Google Places for public production use.
 - **AI API:** not yet deployed or verified live. The Render blueprint is ready, but no active Render connection/service was available in the current workflow. The API also requires an authorized AI-provider key and a private `APP_API_TOKEN`.
 - **Persistence:** the API currently writes to a JSON file. Typical free web instances may sleep and may not preserve local files, so use a managed database or persistent volume before relying on it for ongoing business records.
