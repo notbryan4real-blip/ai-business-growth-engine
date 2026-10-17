@@ -17,6 +17,7 @@ The static dashboard is published on GitHub Pages. Its browser-local workspace s
 - `render.yaml`: deployment blueprint for the API on Render's free tier.
 - `demos/shiraz-plumbing/index.html`: existing customer-facing website demo.
 - `docs/prospects/shiraz-plumbing-audit.md`: existing audit notes.
+- `docs/user-manual.md`: current phone-first operation, setup, troubleshooting, and release checklist.
 
 ## Run the API
 
