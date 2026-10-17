@@ -144,6 +144,69 @@ def discover_businesses(request: DiscoveryInput, authorization: str | None = Hea
     }
 
 
+class ApprovalInput(BaseModel):
+    action_type: Literal["outreach", "publish_website", "financial_commitment", "customer_data_access", "other"]
+    target: str = Field(min_length=1, max_length=300)
+    summary: str = Field(min_length=1, max_length=2000)
+    payload: dict[str, Any] = Field(default_factory=dict)
+    evidence: list[str] = Field(default_factory=list, max_length=50)
+
+
+class ApprovalDecisionInput(BaseModel):
+    decision: Literal["approved", "rejected"]
+    rationale: str = Field(min_length=3, max_length=2000)
+
+
+@app.get("/api/approvals")
+def list_approvals(authorization: str | None = Header(default=None)):
+    require_api_token(authorization)
+    with LOCK:
+        store = read_store()
+        return {"approvals": store.get("approvals", [])}
+
+
+@app.post("/api/approvals")
+def create_approval(request: ApprovalInput, authorization: str | None = Header(default=None)):
+    require_api_token(authorization)
+    record = {
+        "id": uuid.uuid4().hex,
+        "action_type": request.action_type,
+        "target": request.target,
+        "summary": request.summary,
+        "payload": request.payload,
+        "evidence": request.evidence,
+        "status": "pending",
+        "created_at": datetime.now(timezone.utc).isoformat(),
+        "decision": None,
+    }
+    with LOCK:
+        store = read_store()
+        store.setdefault("approvals", []).append(record)
+        write_store(store)
+    return record
+
+
+@app.patch("/api/approvals/{approval_id}")
+def decide_approval(approval_id: str, request: ApprovalDecisionInput, authorization: str | None = Header(default=None)):
+    require_api_token(authorization)
+    with LOCK:
+        store = read_store()
+        approvals = store.setdefault("approvals", [])
+        record = next((item for item in approvals if item.get("id") == approval_id), None)
+        if record is None:
+            raise HTTPException(status_code=404, detail="Approval request not found.")
+        if record.get("status") != "pending":
+            raise HTTPException(status_code=409, detail="Only pending approval requests can be decided.")
+        record["status"] = request.decision
+        record["decision"] = {
+            "decision": request.decision,
+            "rationale": request.rationale,
+            "decided_at": datetime.now(timezone.utc).isoformat(),
+        }
+        write_store(store)
+    return record
+
+
 @app.post("/api/agents/run")
 def run_agents(request: RunInput, authorization: str | None = Header(default=None)):
     require_api_token(authorization)
