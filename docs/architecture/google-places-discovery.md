@@ -2,7 +2,11 @@
 
 ## What it does
 
-The authenticated `POST /api/discovery/search` endpoint uses Google Places API (New) Text Search. It normalizes business name, category, address, phone, website URL, rating, review count, Maps URL, and place ID for the immediate response. It computes an explainable score for the current response only.
+The authenticated `POST /api/discovery/search` endpoint uses Google Places API (New) Text Search. It returns business name, category, formatted address, Maps URL, and place ID for the current response. It computes an explainable score for that response only.
+
+## Cost controls
+
+The field mask requests only the ID, display name, primary type display name, formatted address, and Google Maps URI. It deliberately excludes higher-cost Enterprise fields such as website URI, phone number, rating, and review count. Google documents field-level SKU tiers in its [Place Data Fields reference](https://developers.google.com/maps/documentation/places/web-service/data-fields). Confirm current pricing and quota limits before use.
 
 ## Required configuration
 
@@ -22,12 +26,12 @@ The endpoint returns live candidates and the dashboard displays them temporarily
 
 ## Website evidence semantics
 
-- `listed`: Places returned a website URL.
-- `not_listed_unverified`: Places did not return a website URL. This is not proof that the business has no website.
-- `confirmed_missing`: an operator or separate authorized verification process has independently confirmed the website is absent.
-- `unknown`: no determination has been made.
+- `listed`: an authorized, separate verification process confirmed a website URL.
+- `not_listed_unverified`: a source did not return a website URL. This is not proof that the business has no website.
+- `confirmed_missing`: an operator or separate authorized verification process independently confirmed the website is absent.
+- `unknown`: website status has not been verified.
 
-The scoring engine awards the no-website factor only for `confirmed_missing`. Google Places results are transient and do not independently verify that a business lacks a website.
+The scoring engine awards the no-website factor only for `confirmed_missing`. Google Places discovery deliberately does not request website data; candidates require independent website verification before making website-related claims.
 
 ## Limitations
 
