@@ -14,8 +14,7 @@ from typing import Any
 PLACES_SEARCH_URL = "https://places.googleapis.com/v1/places:searchText"
 FIELD_MASK = ",".join([
     "places.id", "places.displayName", "places.primaryTypeDisplayName",
-    "places.formattedAddress", "places.nationalPhoneNumber", "places.websiteUri",
-    "places.rating", "places.userRatingCount", "places.googleMapsUri",
+    "places.formattedAddress", "places.googleMapsUri",
 ])
 
 
@@ -67,22 +66,18 @@ def search_places(query: str, max_results: int = 10, api_key: str | None = None)
     for place in data.get("places", []):
         display_name = place.get("displayName") or {}
         primary_type = place.get("primaryTypeDisplayName") or {}
-        website = place.get("websiteUri")
         results.append({
             "place_id": place.get("id"),
             "business_name": display_name.get("text") or "Unknown business",
             "category": primary_type.get("text"),
             "location": place.get("formattedAddress"),
-            "phone": place.get("nationalPhoneNumber"),
-            "website_url": website,
-            "website_status": "listed" if website else "not_listed_unverified",
-            "rating": place.get("rating"),
-            "review_count": place.get("userRatingCount", 0),
+            "phone": None,
+            "website_url": None,
+            "website_status": "unknown",
+            "rating": None,
+            "review_count": 0,
             "source": "google_places",
             "source_url": place.get("googleMapsUri"),
-            "verification_note": (
-                "Google Places lists a website URL." if website
-                else "Google Places did not return a website URL; absence is unverified."
-            ),
+            "verification_note": "Website status was not requested from Google Places; verify independently.",
         })
     return results
