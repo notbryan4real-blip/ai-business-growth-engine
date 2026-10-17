@@ -16,9 +16,9 @@ def test_discovery_only_persists_place_ids(tmp_path, monkeypatch):
         "location": "Alpharetta, GA",
         "phone": "555-0100",
         "website_url": None,
-        "website_status": "not_listed_unverified",
-        "rating": 4.7,
-        "review_count": 50,
+        "website_status": "unknown",
+        "rating": None,
+        "review_count": 0,
         "source": "google_places",
         "source_url": "https://maps.google.com/?q=example",
         "verification_note": "Website absence is unverified.",
@@ -31,7 +31,7 @@ def test_discovery_only_persists_place_ids(tmp_path, monkeypatch):
 
     assert result["results_are_transient"] is True
     assert result["results_returned"] == 1
-    assert result["prospects"][0]["opportunity_score"] == 25
+    assert result["prospects"][0]["opportunity_score"] == 0
     stored = json.loads((tmp_path / "store.json").read_text(encoding="utf-8"))
     assert stored["google_place_ids"] == ["place-id-123"]
     assert stored["prospects"] == []
