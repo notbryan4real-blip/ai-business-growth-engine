@@ -69,7 +69,7 @@ def search_places(query: str, max_results: int = 10, api_key: str | None = None)
         primary_type = place.get("primaryTypeDisplayName") or {}
         website = place.get("websiteUri")
         results.append({
-            "provider_id": place.get("id"),
+            "place_id": place.get("id"),
             "business_name": display_name.get("text") or "Unknown business",
             "category": primary_type.get("text"),
             "location": place.get("formattedAddress"),
