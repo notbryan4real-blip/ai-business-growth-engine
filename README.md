@@ -32,7 +32,7 @@ API routes:
 - `GET /api/agents` — specialist-agent catalog
 - `GET /api/prospects` — stored prospect and run records
 - `POST /api/prospects` — score and save a prospect
-- `POST /api/discovery/search` — discover and deduplicate candidate businesses with Google Places API (New); requires `BUSINESS_DATA_API_KEY` and the API bearer token
+- `POST /api/discovery/search` — search live candidates with Google Places API (New); requires `BUSINESS_DATA_API_KEY` and the API bearer token; results are transient and only place IDs are retained
 - `POST /api/agents/run` — run selected specialist agents in sequence
 
 Set `AI_API_KEY` to an Anthropic API key in the hosting environment. For live business discovery, set `BUSINESS_DATA_API_KEY` to a server-restricted Google Maps Platform key with Places API (New) enabled; `GOOGLE_MAPS_API_KEY` is also accepted. Set `AI_MODEL` to a model enabled for that account; default: `claude-haiku-4-5`. The Render blueprint generates `APP_API_TOKEN` automatically; copy its value from the Render environment settings into the dashboard's session-only token field. Mutating endpoints and agent runs require `Authorization: Bearer <APP_API_TOKEN>`. Never put either secret in source control or commit it to browser-side JavaScript.
@@ -63,7 +63,7 @@ Example agent request:
 
 ## Evidence and safety
 
-- The Google Places adapter treats a missing website field as `not_listed_unverified`, not as proof that no website exists. The scoring engine awards the no-website factor only when absence is independently confirmed. The specialist agents analyze only the evidence submitted in a run. They do not claim to browse the web, scrape Google, verify business facts, or contact prospects.
+- The Google Places adapter treats a missing website field as `not_listed_unverified`, not as proof that no website exists. Results are displayed transiently with Google Maps attribution; only place IDs are retained, in line with Places API caching restrictions. The scoring engine awards the no-website factor only when absence is independently confirmed. The specialist agents analyze only the evidence submitted in a run. They do not claim to browse the web, scrape Google, verify business facts, or contact prospects.
 - No messages are sent automatically. Human review is required before outreach.
 - Scores are transparent heuristics, not probabilities of a sale.
 - Never commit API keys or other secrets.
