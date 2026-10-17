@@ -2,11 +2,11 @@
 
 ## What it does
 
-The API provides an authenticated `POST /api/discovery/search` endpoint backed by Google Places API (New) Text Search. It normalizes business name, category, address, phone, website URL, rating, review count, Maps URL, and provider ID; scores each prospect with transparent rules; stores new records; and skips duplicates.
+The authenticated `POST /api/discovery/search` endpoint uses Google Places API (New) Text Search. It normalizes business name, category, address, phone, website URL, rating, review count, Maps URL, and place ID for the immediate response. It computes an explainable score for the current response only.
 
 ## Required configuration
 
-Set `BUSINESS_DATA_API_KEY` in the API hosting environment to a Google Maps Platform API key with Places API (New) enabled. `GOOGLE_MAPS_API_KEY` is accepted as an alternative variable name. Restrict the key to the required API and appropriate server-side use. Do not place it in the browser or source control. Google Cloud billing and quotas may apply.
+Set `BUSINESS_DATA_API_KEY` in the API hosting environment to a Google Maps Platform API key with Places API (New) enabled. `GOOGLE_MAPS_API_KEY` is accepted as an alternative variable name. Restrict the key to Places API and server-side use. Do not put it in browser code or source control. Google Cloud billing and quotas may apply.
 
 ## Request
 
@@ -18,7 +18,7 @@ Content-Type: application/json
 {"query":"plumbers in Alpharetta, Georgia","max_results":10}
 ```
 
-The result reports returned, created, and duplicate counts. Repeated queries skip matching records based on provider ID, Maps URL, or normalized business name and address.
+The endpoint returns live candidates and the dashboard displays them temporarily with Google Maps attribution. It does not create permanent CRM prospect records from Google Places content. The backend retains only Google Places place IDs, which are exempt from Places API caching restrictions. Do not copy returned names, addresses, phone numbers, ratings, website URLs, or other Places content into permanent storage unless a separately applicable agreement or policy permits it.
 
 ## Website evidence semantics
 
@@ -27,8 +27,8 @@ The result reports returned, created, and duplicate counts. Repeated queries ski
 - `confirmed_missing`: an operator or separate authorized verification process has independently confirmed the website is absent.
 - `unknown`: no determination has been made.
 
-The scoring engine should award the no-website factor only for `confirmed_missing`. This prevents an incomplete Places record from being misrepresented as a verified marketing opportunity.
+The scoring engine awards the no-website factor only for `confirmed_missing`. Google Places results are transient and do not independently verify that a business lacks a website.
 
 ## Limitations
 
-This integration performs discovery only. It does not crawl websites, verify owner identity, read private Google Business Profile data, send outreach, or publish customer assets. Google Places terms, quotas, field billing, and API availability must be reviewed before production use.
+This integration performs discovery only. It does not crawl websites, verify owner identity, read private Google Business Profile data, send outreach, or publish customer assets. The application must comply with current Google Maps Platform attribution, terms, and privacy-policy requirements. Review official [Places API policies](https://developers.google.com/maps/documentation/places/web-service/policies) before production use.
