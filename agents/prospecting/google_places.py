@@ -1,7 +1,7 @@
 """Google Places API (New) adapter for authorized business discovery.
 
-A missing websiteUri means Places did not list a website; it does not prove
-that the business has no website.
+Website fields are deliberately not requested to control costs. Search results
+must not be used to infer that a business has no website.
 """
 from __future__ import annotations
 
