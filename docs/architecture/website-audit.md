@@ -19,6 +19,7 @@ The auditor extracts only observable signals from the fetched HTML: page title, 
 - Only HTTP/HTTPS public hosts are accepted.
 - Localhost, private, loopback, link-local, and reserved IPs are rejected.
 - Redirect destinations are revalidated; redirects are bounded.
+- DNS validation reduces SSRF risk but does not eliminate DNS-rebinding/TOCTOU risk; production deployment should enforce outbound network restrictions at the hosting/network layer.
 - The response body is capped at 1 MB and the request has a short timeout.
 - Non-HTML responses are rejected.
 - This is not a full browser, Lighthouse, accessibility, SEO, or performance certification. JavaScript-rendered content, authenticated pages, third-party resources, and real conversion behavior may not be visible.
