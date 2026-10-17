@@ -2,24 +2,33 @@ from __future__ import annotations
 import hmac, json, os, uuid
 from pathlib import Path
 from threading import Lock
-from typing import Any
+from typing import Any, Literal
+from datetime import datetime, timezone
 from fastapi import FastAPI, Header, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 from agents.runtime import AGENTS, AgentRuntimeError, run_specialists
 from agents.prospecting.models import Prospect
 from agents.qualification.scoring import score_prospect
+from agents.prospecting.google_places import PlacesDiscoveryError, search_places
+from agents.audit.website import WebsiteAuditError, audit_website
 
 DATA_PATH = Path(os.getenv("GROWTH_ENGINE_DATA_PATH", "data/runtime_store.json"))
 LOCK = Lock()
 app = FastAPI(title="AI Business Growth Engine API", version="0.1.0")
-app.add_middleware(CORSMiddleware, allow_origins=os.getenv("CORS_ORIGINS", "http://localhost:8000,http://127.0.0.1:8000").split(","), allow_credentials=False, allow_methods=["GET", "POST", "PUT", "OPTIONS"], allow_headers=["Content-Type", "Authorization"])
+app.add_middleware(CORSMiddleware, allow_origins=os.getenv("CORS_ORIGINS", "http://localhost:8000,http://127.0.0.1:8000").split(","), allow_credentials=False, allow_methods=["GET", "POST", "PUT", "PATCH", "OPTIONS"], allow_headers=["Content-Type", "Authorization"])
 
 class ProspectInput(BaseModel):
     business_name: str = Field(min_length=1, max_length=200)
     category: str | None = Field(default=None, max_length=100)
     location: str | None = Field(default=None, max_length=200)
     website_url: str | None = Field(default=None, max_length=1000)
+    website_status: Literal["unknown", "listed", "not_listed_unverified", "confirmed_missing"] = "unknown"
+    provider_id: str | None = Field(default=None, max_length=300)
+    source: str | None = Field(default=None, max_length=100)
+    website_status: Literal["unknown", "listed", "not_listed_unverified", "confirmed_missing"] = "unknown"
+    provider_id: str | None = Field(default=None, max_length=300)
+    source: str | None = Field(default=None, max_length=100)
     source_url: str | None = Field(default=None, max_length=1000)
     rating: float | None = Field(default=None, ge=0, le=5)
     review_count: int = Field(default=0, ge=0)
@@ -53,7 +62,7 @@ def write_store(store: dict[str, Any]) -> None:
 
 @app.get("/api/health")
 def health():
-    return {"status":"ok","service":"growth-engine-api","ai_configured":bool(os.getenv("AI_API_KEY") or os.getenv("ANTHROPIC_API_KEY")),"api_token_configured":bool(os.getenv("APP_API_TOKEN")),"agent_count":len(AGENTS),"persistence":str(DATA_PATH)}
+    return {"status":"ok","service":"growth-engine-api","ai_configured":bool(os.getenv("AI_API_KEY") or os.getenv("ANTHROPIC_API_KEY")),"api_token_configured":bool(os.getenv("APP_API_TOKEN")),"google_places_configured":bool(os.getenv("BUSINESS_DATA_API_KEY") or os.getenv("GOOGLE_MAPS_API_KEY")),"agent_count":len(AGENTS),"persistence":str(DATA_PATH)}
 
 @app.get("/api/agents")
 def list_agents():
@@ -67,13 +76,153 @@ def list_prospects():
 def create_prospect(p: ProspectInput, authorization: str | None = Header(default=None)):
     require_api_token(authorization)
     record=p.model_dump()
-    model=Prospect(business_name=record["business_name"],category=record["category"],location=record["location"],website_url=record["website_url"],source_url=record["source_url"],rating=record["rating"],review_count=record["review_count"],website_quality_score=record["website_quality_score"],social_urls=record["social_urls"],notes=record["notes"]+record["verified_observations"])
+    model=Prospect(business_name=record["business_name"],category=record["category"],location=record["location"],website_url=record["website_url"],website_status=record["website_status"],source=record["source"],source_url=record["source_url"],rating=record["rating"],review_count=record["review_count"],website_quality_score=record["website_quality_score"],social_urls=record["social_urls"],notes=record["notes"]+record["verified_observations"])
     model.validate()
     score=score_prospect(model)
     record.update({"id":uuid.uuid4().hex,"opportunity_score":score.total,"score_factors":score.factors,"stage":"research"})
     with LOCK:
         store=read_store(); store["prospects"].append(record); write_store(store)
     return record
+
+class DiscoveryInput(BaseModel):
+    query: str = Field(min_length=3, max_length=300)
+    max_results: int = Field(default=10, ge=1, le=20)
+
+
+@app.post("/api/discovery/search")
+def discover_businesses(request: DiscoveryInput, authorization: str | None = Header(default=None)):
+    """Search Google Places; persist only place IDs, not restricted Places content."""
+    require_api_token(authorization)
+    try:
+        candidates = search_places(request.query, max_results=request.max_results)
+    except PlacesDiscoveryError as exc:
+        raise HTTPException(status_code=503, detail=str(exc)) from exc
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+
+    results: list[dict[str, Any]] = []
+    with LOCK:
+        store = read_store()
+        saved_ids = set(store.get("google_place_ids", []))
+        for item in candidates:
+            place_id = item.get("place_id")
+            model = Prospect(
+                business_name=item["business_name"],
+                category=item.get("category"),
+                location=item.get("location"),
+                phone=item.get("phone"),
+                website_url=item.get("website_url"),
+                website_status=item.get("website_status", "not_listed_unverified"),
+                rating=item.get("rating"),
+                review_count=item.get("review_count", 0),
+                source=item.get("source"),
+                source_url=item.get("source_url"),
+            )
+            score = score_prospect(model)
+            results.append({
+                **item,
+                "opportunity_score": score.total,
+                "score_factors": score.factors,
+                "previously_seen": bool(place_id and place_id in saved_ids),
+            })
+            if place_id:
+                saved_ids.add(place_id)
+        # Google Places place IDs are exempt from caching restrictions; do not
+        # persist names, addresses, phones, ratings, URLs, or other Places content.
+        store["google_place_ids"] = sorted(saved_ids)
+        write_store(store)
+
+    return {
+        "status": "completed",
+        "provider": "google_places",
+        "query": request.query,
+        "results_returned": len(results),
+        "place_ids_retained": len(saved_ids),
+        "results_are_transient": True,
+        "prospects": results,
+        "attribution": "Google Maps",
+        "notice": "Results are live and are not saved as prospect records. A missing website URL in Places is unverified, not proof that the business has no website. Verify facts independently before adding a prospect to the CRM.",
+    }
+
+
+class WebsiteAuditInput(BaseModel):
+    url: str = Field(min_length=8, max_length=2000)
+
+
+@app.post("/api/audit/website")
+def audit_public_website(request: WebsiteAuditInput, authorization: str | None = Header(default=None)):
+    """Run a bounded static HTML audit of a publicly accessible website."""
+    require_api_token(authorization)
+    try:
+        return audit_website(request.url)
+    except WebsiteAuditError as exc:
+        raise HTTPException(status_code=502, detail=str(exc)) from exc
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail="Invalid website URL.") from exc
+
+
+class ApprovalInput(BaseModel):
+    action_type: Literal["outreach", "publish_website", "financial_commitment", "customer_data_access", "other"]
+    target: str = Field(min_length=1, max_length=300)
+    summary: str = Field(min_length=1, max_length=2000)
+    payload: dict[str, Any] = Field(default_factory=dict)
+    evidence: list[str] = Field(default_factory=list, max_length=50)
+
+
+class ApprovalDecisionInput(BaseModel):
+    decision: Literal["approved", "rejected"]
+    rationale: str = Field(min_length=3, max_length=2000)
+
+
+@app.get("/api/approvals")
+def list_approvals(authorization: str | None = Header(default=None)):
+    require_api_token(authorization)
+    with LOCK:
+        store = read_store()
+        return {"approvals": store.get("approvals", [])}
+
+
+@app.post("/api/approvals")
+def create_approval(request: ApprovalInput, authorization: str | None = Header(default=None)):
+    require_api_token(authorization)
+    record = {
+        "id": uuid.uuid4().hex,
+        "action_type": request.action_type,
+        "target": request.target,
+        "summary": request.summary,
+        "payload": request.payload,
+        "evidence": request.evidence,
+        "status": "pending",
+        "created_at": datetime.now(timezone.utc).isoformat(),
+        "decision": None,
+    }
+    with LOCK:
+        store = read_store()
+        store.setdefault("approvals", []).append(record)
+        write_store(store)
+    return record
+
+
+@app.patch("/api/approvals/{approval_id}")
+def decide_approval(approval_id: str, request: ApprovalDecisionInput, authorization: str | None = Header(default=None)):
+    require_api_token(authorization)
+    with LOCK:
+        store = read_store()
+        approvals = store.setdefault("approvals", [])
+        record = next((item for item in approvals if item.get("id") == approval_id), None)
+        if record is None:
+            raise HTTPException(status_code=404, detail="Approval request not found.")
+        if record.get("status") != "pending":
+            raise HTTPException(status_code=409, detail="Only pending approval requests can be decided.")
+        record["status"] = request.decision
+        record["decision"] = {
+            "decision": request.decision,
+            "rationale": request.rationale,
+            "decided_at": datetime.now(timezone.utc).isoformat(),
+        }
+        write_store(store)
+    return record
+
 
 @app.post("/api/agents/run")
 def run_agents(request: RunInput, authorization: str | None = Header(default=None)):
