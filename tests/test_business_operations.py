@@ -1,4 +1,5 @@
 from datetime import timedelta
+import json
 
 import pytest
 from fastapi import FastAPI, HTTPException
@@ -35,6 +36,46 @@ def test_pause_stops_automatic_planning(engine):
     engine.transact(lambda s: s["settings"].update(autonomy_enabled=False))
     assert engine.cycle()["status"] == "paused"
     assert not engine.overview()["tasks"]
+
+
+def test_private_bootstrap_is_idempotent_and_preserves_existing_cash(engine):
+    raw = json.dumps({"snapshots":[{"project_id":"greenify", "snapshot":snapshot().model_dump(mode="json")}]})
+    assert engine.bootstrap(raw) == {"configured":True,"loaded":True,"snapshots":1}
+    engine.cash_entry(CashInput(project_id="greenify", kind="receipt", amount_cents=100,
+        reference="payment-001", occurred_at=now()))
+    engine.bootstrap(raw)
+    assert len(engine.transact(lambda s:s["snapshots"])) == 1
+    assert engine.overview()["money"]["receipt_cents"] == 100
+    assert engine.overview()["projects"][0]["snapshot"]["verification"] == "owner_import"
+
+
+def test_bootstrap_rolls_back_entire_batch_for_unknown_project_or_conflict(engine):
+    first = snapshot()
+    document = {"snapshots":[{"project_id":"greenify", "snapshot":first.model_dump(mode="json")},
+        {"project_id":"unknown", "snapshot":snapshot().model_dump(mode="json")}]}
+    with pytest.raises(HTTPException):
+        engine.bootstrap(json.dumps(document))
+    assert engine.transact(lambda s:s["snapshots"]) == []
+    with pytest.raises(ValueError):
+        engine.bootstrap(json.dumps({"snapshots":[]}))
+    assert engine.bootstrap("")["configured"] is False
+
+
+def test_startup_bootstrap_and_operations_are_available_without_exposing_private_data(engine, monkeypatch, tmp_path):
+    import app as application
+    monkeypatch.setattr(application, "BUSINESS", engine)
+    monkeypatch.setattr(application, "DATA_PATH", tmp_path / "runs.json")
+    monkeypatch.setenv("APP_API_TOKEN", "test-owner-token")
+    monkeypatch.delenv("SHOPIFY_ADMIN_TOKEN", raising=False)
+    raw = json.dumps({"snapshots":[{"project_id":"greenify", "snapshot":snapshot(summary="private observation").model_dump(mode="json")}]})
+    monkeypatch.setenv("BUSINESS_BOOTSTRAP_JSON", raw)
+    with TestClient(application.app) as client:
+        health = client.get("/api/health").json()
+        assert health["business_bootstrap_loaded"] and health["version"] == "0.3.1"
+        assert "private observation" not in json.dumps(health)
+        assert client.get("/api/business/overview").status_code == 401
+        assert engine.overview()["projects"][0]["snapshot"]["summary"] == "private observation"
+        assert engine.overview()["tasks"]
 
 
 def test_new_evidence_reopens_review_without_duplicating_existing_tasks(engine):

@@ -1,5 +1,5 @@
 from __future__ import annotations
-import asyncio, hmac, json, os, uuid
+import asyncio, hmac, json, logging, os, uuid
 from pathlib import Path
 from threading import Lock, BoundedSemaphore
 from concurrent.futures import ThreadPoolExecutor
@@ -22,9 +22,11 @@ DATA_PATH = Path(os.getenv("GROWTH_ENGINE_DATA_PATH", "data/runtime_store.json")
 LOCK = Lock()
 RUN_SLOT = BoundedSemaphore(1)
 WORKER = ThreadPoolExecutor(max_workers=1, thread_name_prefix="swarm")
+BUSINESS_BOOTSTRAP = {"configured": False, "loaded": False, "snapshots": 0}
 
 @asynccontextmanager
 async def lifespan(app):
+    global BUSINESS_BOOTSTRAP
     # A process restart must never silently replay paid model calls.
     with LOCK:
         store = read_store()
@@ -35,6 +37,17 @@ async def lifespan(app):
                 changed = True
         if changed:
             write_store(store)
+    try:
+        BUSINESS_BOOTSTRAP = BUSINESS.bootstrap(os.getenv("BUSINESS_BOOTSTRAP_JSON", ""))
+        BUSINESS.cycle()
+        overview = BUSINESS.overview()
+        logging.getLogger("uvicorn.error").info(
+            "Business operations ready: projects=%s snapshots_imported=%s open_tasks=%s; no model calls or external writes.",
+            len(overview["projects"]), BUSINESS_BOOTSTRAP["snapshots"],
+            sum(t["status"] == "open" for t in overview["tasks"]))
+    except Exception:
+        BUSINESS_BOOTSTRAP = {"configured": bool(os.getenv("BUSINESS_BOOTSTRAP_JSON")), "loaded": False, "snapshots": 0}
+        logging.getLogger("uvicorn.error").error("Business bootstrap failed validation; existing evidence retained. Check private configuration.")
     scheduler = asyncio.create_task(business_scheduler())
     try:
         yield
@@ -45,7 +58,7 @@ async def lifespan(app):
         except asyncio.CancelledError:
             pass
 
-app = FastAPI(title="AI Business Growth Engine API", version="0.2.0", lifespan=lifespan)
+app = FastAPI(title="AI Business Growth Engine API", version="0.3.1", lifespan=lifespan)
 app.add_middleware(CORSMiddleware, allow_origins=os.getenv("CORS_ORIGINS", "http://localhost:8000,http://127.0.0.1:8000").split(","), allow_credentials=False, allow_methods=["GET", "POST", "PUT", "PATCH", "OPTIONS"], allow_headers=["Content-Type", "Authorization"])
 
 class ProspectInput(BaseModel):
@@ -127,7 +140,7 @@ async def business_scheduler():
 
 @app.get("/api/health")
 def health():
-    return {"status":"ok","service":"growth-engine-api","version":"0.3.0","business_operations":True,"live_run_events":True,"ai_configured":bool(os.getenv("AI_API_KEY") or os.getenv("ANTHROPIC_API_KEY")),"api_token_configured":bool(os.getenv("APP_API_TOKEN")),"google_places_configured":bool(os.getenv("BUSINESS_DATA_API_KEY") or os.getenv("GOOGLE_MAPS_API_KEY")),"agent_count":len(AGENTS),"persistence":str(DATA_PATH)}
+    return {"status":"ok","service":"growth-engine-api","version":"0.3.1","business_operations":True,"business_bootstrap_loaded":BUSINESS_BOOTSTRAP["loaded"],"live_run_events":True,"ai_configured":bool(os.getenv("AI_API_KEY") or os.getenv("ANTHROPIC_API_KEY")),"api_token_configured":bool(os.getenv("APP_API_TOKEN")),"google_places_configured":bool(os.getenv("BUSINESS_DATA_API_KEY") or os.getenv("GOOGLE_MAPS_API_KEY")),"agent_count":len(AGENTS),"persistence":str(DATA_PATH)}
 
 @app.get("/api/agents")
 def list_agents():

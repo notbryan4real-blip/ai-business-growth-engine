@@ -110,6 +110,11 @@ class SettingsInput(StrictModel):
     weekly_target_cents: int = Field(default=100000, ge=100, le=100000000)
 
 
+class BootstrapItem(StrictModel):
+    project_id: str = Field(min_length=1, max_length=80)
+    snapshot: SnapshotInput
+
+
 class Operations:
     def __init__(self, path=None):
         self.path = Path(path or os.getenv("BUSINESS_DB_PATH", "data/business.sqlite3"))
@@ -146,19 +151,42 @@ class Operations:
         items = [s for s in state["snapshots"] if s["project_id"] == project_id]
         return max(items, key=lambda s: s["observed_at"]) if items else None
 
-    def ingest(self, project_id, request, verification="owner_import"):
+    def _insert_snapshot(self, state, project_id, request, verification):
         payload = request.model_dump(mode="json")
+        self.project(state, project_id)
+        previous = next((s for s in state["snapshots"] if s["project_id"] == project_id
+                         and s["reference"] == payload["reference"]), None)
+        if previous:
+            if any(previous.get(k) != v for k, v in payload.items()):
+                raise HTTPException(409, "Snapshot reference already used for different data.")
+            return previous
+        item = {**payload, "project_id": project_id, "verification": verification, "imported_at": iso()}
+        state["snapshots"].append(item)
+        return item
+
+    def ingest(self, project_id, request, verification="owner_import"):
+        return self.transact(lambda s: self._insert_snapshot(s, project_id, request, verification))
+
+    def bootstrap(self, raw):
+        """Restore owner-provided baseline evidence from private hosting config.
+
+        This does not grant API access or turn imported claims into live data.
+        The full batch is atomic; repeated startup preserves edits and cash.
+        """
+        if not raw:
+            return {"configured": False, "loaded": False, "snapshots": 0}
+        if len(raw.encode()) > 2_000_000:
+            raise ValueError("Bootstrap document exceeds the configured size limit.")
+        document = json.loads(raw)
+        if not isinstance(document, dict) or not isinstance(document.get("snapshots"), list):
+            raise ValueError("Bootstrap requires a snapshots array.")
+        if not 1 <= len(document["snapshots"]) <= 20:
+            raise ValueError("Bootstrap requires one to twenty snapshots.")
+        entries = [BootstrapItem.model_validate(item) for item in document["snapshots"]]
         def change(state):
-            self.project(state, project_id)
-            previous = next((s for s in state["snapshots"] if s["project_id"] == project_id
-                             and s["reference"] == payload["reference"]), None)
-            if previous:
-                if any(previous.get(k) != v for k, v in payload.items()):
-                    raise HTTPException(409, "Snapshot reference already used for different data.")
-                return previous
-            item = {**payload, "project_id": project_id, "verification": verification, "imported_at": iso()}
-            state["snapshots"].append(item)
-            return item
+            for item in entries:
+                self._insert_snapshot(state, item.project_id, item.snapshot, "owner_import")
+            return {"configured": True, "loaded": True, "snapshots": len(entries)}
         return self.transact(change)
 
     def cash_entry(self, request):

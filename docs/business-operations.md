@@ -53,6 +53,14 @@ their source and observation time and are labeled `owner_import`, not as a live
 connection. Zero recorded inventory is a check for stock, tracking settings and
 supplier fulfillment, not proof of an unavailable product.
 
+For an owner-controlled deployment import, `BUSINESS_BOOTSTRAP_JSON` can hold
+the private snapshot bundle in Render's environment settings. Startup validates
+and imports the complete batch atomically, using the same `owner_import`
+provenance as the UI. Repeated startups are idempotent and preserve cash and
+task state. This setting does not change `APP_API_TOKEN` or enable provider
+access. Keep the actual value out of source control and logs. It restores only
+the baseline observations after ephemeral storage loss, not later cash entries.
+
 ## Rillmark / Polsia
 
 No undocumented Polsia API is assumed. There is a receiver for a future
