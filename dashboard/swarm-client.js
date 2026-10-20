@@ -29,7 +29,7 @@ export class SwarmClient {
     localStorage.setItem('growth-engine-api-url', this.base);
     sessionStorage.setItem('growth-engine-api-token', this.token);
     const health = await this.request('/api/health');
-    if (!health.live_run_events) throw new Error('The backend needs the Swarm 0.2 upgrade before live runs can start.');
+    if (!health.live_run_events) throw new Error('Backend upgrade required. In Render, open this API service and choose Manual Deploy → Deploy latest commit, then reconnect.');
     await this.request('/api/approvals'); // Verify the private token before offering paid runs.
     this.catalog = (await this.request('/api/agents')).agents;
     this.onStatus('Connected · '+this.catalog.length+' roles · '+(health.ai_configured ? 'AI key configured' : 'AI key missing'));

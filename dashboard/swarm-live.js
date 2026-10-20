@@ -1,5 +1,12 @@
-import {SwarmClient, QUICK_AGENTS, AGENT_IDS} from './swarm-client.js';
+import {SwarmClient, QUICK_AGENTS, AGENT_IDS} from './swarm-client.js?v=0.2.1';
 const get = id => document.getElementById(id);
+function setStatus(message, error=false) {
+  get('liveStatus').textContent=message;
+  get('liveFormStatus').textContent=message;
+  get('liveFormStatus').dataset.error=String(error);
+  if(error && !get('liveControls').classList.contains('hide'))
+    get('liveFormStatus').scrollIntoView({block:'nearest'});
+}
 let transfers=0;
 const client = new SwarmClient(event => {
   const active = AGENT_IDS.indexOf(event.agent_id);
@@ -27,7 +34,7 @@ const client = new SwarmClient(event => {
   line.textContent=event.type==='agent_completed' ? event.name+': '+event.output.summary : event.type+' '+(event.name||'');
   get('feed').prepend(line); while(get('feed').children.length>4)get('feed').lastElementChild.remove();
 }, status => {
-  get('liveStatus').textContent=status;
+  setStatus(status);
   get('systemStatus').textContent=/^(running|queued) ·/.test(status)?'● LIVE RUN':'● LIVE API';
   document.querySelector('.sys small').textContent='ACTUAL BACKEND EVENTS';
   if(client.latest) {
@@ -40,7 +47,7 @@ const client = new SwarmClient(event => {
 get('liveApi').value=client.base; get('liveToken').value=client.token;
 get('run').onclick=()=>get('liveControls').classList.remove('hide');
 get('closeLive').onclick=()=>get('liveControls').classList.add('hide');
-get('pause').onclick=async()=>{try{await client.cancel();}catch(e){get('liveStatus').textContent=e.message;}};
+get('pause').onclick=async()=>{try{await client.cancel();}catch(e){setStatus(e.message,true);}};
 get('next').onclick=()=>{
   if(!client.latest) {get('liveControls').classList.remove('hide');return;}
   const blob=new Blob([JSON.stringify(client.latest,null,2)],{type:'application/json'});
@@ -48,12 +55,17 @@ get('next').onclick=()=>{
   setTimeout(()=>URL.revokeObjectURL(link.href),1000);
 };
 get('connectLive').onclick=async()=>{
+  get('connectLive').disabled=true;
+  setStatus('Checking backend and access token…');
   try {await client.connect(get('liveApi').value,get('liveToken').value);transfers=0;get('streamLog').replaceChildren();await client.resume();}
-  catch(e){get('liveStatus').textContent=e.message;}
+  catch(e){setStatus(e.message,true);}
+  finally{get('connectLive').disabled=false;}
 };
 get('liveForm').onsubmit=async event=>{
   event.preventDefault(); if(client.polling)return;
   get('startLive').disabled=true;
+  get('startLive').textContent='Connecting…';
+  setStatus('Checking backend before starting a paid run…');
   try {
     await client.connect(get('liveApi').value,get('liveToken').value);
     transfers=0;get('streamLog').replaceChildren();
@@ -66,6 +78,6 @@ get('liveForm').onsubmit=async event=>{
     get('liveControls').classList.add('hide');
     get('streamPanel').classList.remove('hide');
     await client.start(prospect,ids,Boolean(prospect.website_url));
-  }catch(e){get('liveControls').classList.remove('hide');get('liveStatus').textContent=e.message;}
-  finally{get('startLive').disabled=false;}
+  }catch(e){get('liveControls').classList.remove('hide');setStatus(e.message,true);}
+  finally{get('startLive').disabled=false;get('startLive').textContent='Start live run';}
 };
