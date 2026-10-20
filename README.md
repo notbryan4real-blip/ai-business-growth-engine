@@ -85,3 +85,7 @@ The first prospect experiment is **Shiraz Plumbing in Alpharetta, GA**:
 - Audit: `docs/prospects/shiraz-plumbing-audit.md`
 - Sales demo: `demos/shiraz-plumbing/index.html`
 - Re-verify current business details before any customer contact.
+
+## Portfolio business operations
+
+Open `business.html` to track Greenify, Rillmark and the project portfolio, run internal operations reviews and record real cash toward the weekly target. See [the operations guide](docs/business-operations.md) for connection status, the scoped Polsia report bridge, server-side Shopify reads and hosting limits.

@@ -1,5 +1,5 @@
 from __future__ import annotations
-import hmac, json, os, uuid
+import asyncio, hmac, json, os, uuid
 from pathlib import Path
 from threading import Lock, BoundedSemaphore
 from concurrent.futures import ThreadPoolExecutor
@@ -15,6 +15,8 @@ from agents.prospecting.models import Prospect
 from agents.qualification.scoring import score_prospect
 from agents.prospecting.google_places import PlacesDiscoveryError, search_places
 from agents.audit.website import WebsiteAuditError, audit_website
+from business.operations import Operations, router as business_router, iso
+from integrations.shopify_business import sync_greenify
 
 DATA_PATH = Path(os.getenv("GROWTH_ENGINE_DATA_PATH", "data/runtime_store.json"))
 LOCK = Lock()
@@ -33,7 +35,15 @@ async def lifespan(app):
                 changed = True
         if changed:
             write_store(store)
-    yield
+    scheduler = asyncio.create_task(business_scheduler())
+    try:
+        yield
+    finally:
+        scheduler.cancel()
+        try:
+            await scheduler
+        except asyncio.CancelledError:
+            pass
 
 app = FastAPI(title="AI Business Growth Engine API", version="0.2.0", lifespan=lifespan)
 app.add_middleware(CORSMiddleware, allow_origins=os.getenv("CORS_ORIGINS", "http://localhost:8000,http://127.0.0.1:8000").split(","), allow_credentials=False, allow_methods=["GET", "POST", "PUT", "PATCH", "OPTIONS"], allow_headers=["Content-Type", "Authorization"])
@@ -84,9 +94,40 @@ def write_store(store: dict[str, Any]) -> None:
     temp.write_text(json.dumps(store, ensure_ascii=False, indent=2), encoding="utf-8")
     temp.replace(DATA_PATH)
 
+
+BUSINESS = Operations()
+app.include_router(business_router(BUSINESS, require_api_token))
+
+
+def business_tick():
+    """No automatic model spend or external mutations; retry failed reads next interval."""
+    state = BUSINESS.overview()
+    if not state["settings"]["autonomy_enabled"]:
+        return
+    if state["connectors"]["shopify_server_configured"]:
+        try:
+            sync_greenify(BUSINESS)
+            result = {"status": "synced", "at": iso()}
+        except Exception:
+            # Never persist response bodies or credential-bearing request objects.
+            result = {"status": "failed", "at": iso(), "error": "Shopify read failed; check server credentials and scopes. Previous evidence retained."}
+        BUSINESS.transact(lambda s: s["connector_runs"].update(shopify=result))
+    BUSINESS.cycle()
+
+
+async def business_scheduler():
+    while True:
+        try:
+            await asyncio.to_thread(business_tick)
+        except Exception:
+            # A storage outage must not stop the existing agent API.
+            import logging
+            logging.getLogger(__name__).error("Business operations tick failed; no external writes performed.")
+        await asyncio.sleep(6 * 60 * 60)
+
 @app.get("/api/health")
 def health():
-    return {"status":"ok","service":"growth-engine-api","version":"0.2.0","live_run_events":True,"ai_configured":bool(os.getenv("AI_API_KEY") or os.getenv("ANTHROPIC_API_KEY")),"api_token_configured":bool(os.getenv("APP_API_TOKEN")),"google_places_configured":bool(os.getenv("BUSINESS_DATA_API_KEY") or os.getenv("GOOGLE_MAPS_API_KEY")),"agent_count":len(AGENTS),"persistence":str(DATA_PATH)}
+    return {"status":"ok","service":"growth-engine-api","version":"0.3.0","business_operations":True,"live_run_events":True,"ai_configured":bool(os.getenv("AI_API_KEY") or os.getenv("ANTHROPIC_API_KEY")),"api_token_configured":bool(os.getenv("APP_API_TOKEN")),"google_places_configured":bool(os.getenv("BUSINESS_DATA_API_KEY") or os.getenv("GOOGLE_MAPS_API_KEY")),"agent_count":len(AGENTS),"persistence":str(DATA_PATH)}
 
 @app.get("/api/agents")
 def list_agents():
