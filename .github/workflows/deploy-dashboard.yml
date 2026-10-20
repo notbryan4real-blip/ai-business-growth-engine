@@ -27,6 +27,8 @@ jobs:
         with:
           enablement: true
       - name: Upload dashboard
+        run: python tools/fetch_web_assets.py
+      - name: Package dashboard
         uses: actions/upload-pages-artifact@v3
         with:
           path: dashboard
