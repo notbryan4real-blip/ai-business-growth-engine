@@ -12,6 +12,7 @@ class Prospect:
     phone: Optional[str] = None
     email: Optional[str] = None
     website_url: Optional[str] = None
+    website_status: str = "unknown"
     social_urls: list[str] = field(default_factory=list)
     rating: Optional[float] = None
     review_count: int = 0
@@ -28,6 +29,12 @@ class Prospect:
             raise ValueError("rating must be between 0 and 5")
         if self.review_count < 0:
             raise ValueError("review_count cannot be negative")
+        if self.website_status not in {
+            "unknown", "listed", "not_listed_unverified", "confirmed_missing"
+        }:
+            raise ValueError("website_status is not a supported status")
+        if self.website_url and self.website_status == "confirmed_missing":
+            raise ValueError("a prospect with a website URL cannot be marked confirmed_missing")
         for name, score in (
             ("website_quality_score", self.website_quality_score),
             ("opportunity_score", self.opportunity_score),

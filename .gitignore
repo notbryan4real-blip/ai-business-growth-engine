@@ -23,3 +23,6 @@ build/
 # Test output
 .coverage
 htmlcov/
+
+# Downloaded, checksum-verified browser assets
+dashboard/vendor/*.js
