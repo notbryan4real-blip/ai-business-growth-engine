@@ -89,3 +89,10 @@ The first prospect experiment is **Shiraz Plumbing in Alpharetta, GA**:
 ## Portfolio business operations
 
 Open `business.html` to track Greenify, Rillmark and the project portfolio, run internal operations reviews and record real cash toward the weekly target. See [the operations guide](docs/business-operations.md) for connection status, the scoped Polsia report bridge, server-side Shopify reads and hosting limits.
+# Personal control room
+
+The private JARVIS council is available at `/jarvis.html` on the existing API and
+dashboard hosting. It adds shared owner memory, 24 specialist roles, recorded
+council handoffs, independent QA, a decision queue and morning planning. See
+[personal-brain.md](docs/personal-brain.md) for execution modes, connections,
+storage limits and scheduling. Existing business workflows remain available.

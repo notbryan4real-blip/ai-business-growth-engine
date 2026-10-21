@@ -17,6 +17,7 @@ from agents.prospecting.google_places import PlacesDiscoveryError, search_places
 from agents.audit.website import WebsiteAuditError, audit_website
 from business.operations import Operations, router as business_router, iso
 from integrations.shopify_business import sync_greenify
+from brain.council import Brain, router as brain_router
 
 DATA_PATH = Path(os.getenv("GROWTH_ENGINE_DATA_PATH", "data/runtime_store.json"))
 LOCK = Lock()
@@ -48,13 +49,20 @@ async def lifespan(app):
     except Exception:
         BUSINESS_BOOTSTRAP = {"configured": bool(os.getenv("BUSINESS_BOOTSTRAP_JSON")), "loaded": False, "snapshots": 0}
         logging.getLogger("uvicorn.error").error("Business bootstrap failed validation; existing evidence retained. Check private configuration.")
+    BRAIN.recover()
     scheduler = asyncio.create_task(business_scheduler())
+    council_scheduler = asyncio.create_task(brain_scheduler())
     try:
         yield
     finally:
         scheduler.cancel()
+        council_scheduler.cancel()
         try:
             await scheduler
+        except asyncio.CancelledError:
+            pass
+        try:
+            await council_scheduler
         except asyncio.CancelledError:
             pass
 
@@ -110,6 +118,20 @@ def write_store(store: dict[str, Any]) -> None:
 
 BUSINESS = Operations()
 app.include_router(business_router(BUSINESS, require_api_token))
+BRAIN = Brain(run_slot=RUN_SLOT)
+app.include_router(brain_router(BRAIN, require_api_token, lambda: BUSINESS.overview()))
+
+
+async def brain_scheduler():
+    from brain.connectors import sync_sources
+    while True:
+        try:
+            if BRAIN.transact(lambda s: s["settings"]["enabled"]):
+                await asyncio.to_thread(sync_sources, BRAIN, False)
+                await asyncio.to_thread(BRAIN.tick)
+        except Exception:
+            logging.getLogger(__name__).error("Council scheduling failed; private state retained.")
+        await asyncio.sleep(60)
 
 
 def business_tick():
@@ -140,7 +162,7 @@ async def business_scheduler():
 
 @app.get("/api/health")
 def health():
-    return {"status":"ok","service":"growth-engine-api","version":"0.3.1","business_operations":True,"business_bootstrap_loaded":BUSINESS_BOOTSTRAP["loaded"],"live_run_events":True,"ai_configured":bool(os.getenv("AI_API_KEY") or os.getenv("ANTHROPIC_API_KEY")),"api_token_configured":bool(os.getenv("APP_API_TOKEN")),"google_places_configured":bool(os.getenv("BUSINESS_DATA_API_KEY") or os.getenv("GOOGLE_MAPS_API_KEY")),"agent_count":len(AGENTS),"persistence":str(DATA_PATH)}
+    return {"status":"ok","service":"growth-engine-api","version":"0.3.1","brain_version":"1.0","brain_agents":24,"business_operations":True,"business_bootstrap_loaded":BUSINESS_BOOTSTRAP["loaded"],"live_run_events":True,"ai_configured":bool(os.getenv("AI_API_KEY") or os.getenv("ANTHROPIC_API_KEY")),"api_token_configured":bool(os.getenv("APP_API_TOKEN")),"google_places_configured":bool(os.getenv("BUSINESS_DATA_API_KEY") or os.getenv("GOOGLE_MAPS_API_KEY")),"agent_count":len(AGENTS),"persistence":str(DATA_PATH)}
 
 @app.get("/api/agents")
 def list_agents():
