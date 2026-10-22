@@ -17,7 +17,8 @@ from agents.prospecting.google_places import PlacesDiscoveryError, search_places
 from agents.audit.website import WebsiteAuditError, audit_website
 from business.operations import Operations, router as business_router, iso
 from integrations.shopify_business import sync_greenify
-from brain.council import Brain, router as brain_router
+from brain.council import Brain, Observation, router as brain_router
+from reactor.service import Reactor, router as reactor_router
 
 DATA_PATH = Path(os.getenv("GROWTH_ENGINE_DATA_PATH", "data/runtime_store.json"))
 LOCK = Lock()
@@ -50,15 +51,22 @@ async def lifespan(app):
         BUSINESS_BOOTSTRAP = {"configured": bool(os.getenv("BUSINESS_BOOTSTRAP_JSON")), "loaded": False, "snapshots": 0}
         logging.getLogger("uvicorn.error").error("Business bootstrap failed validation; existing evidence retained. Check private configuration.")
     BRAIN.recover()
+    REACTOR.recover()
     scheduler = asyncio.create_task(business_scheduler())
     council_scheduler = asyncio.create_task(brain_scheduler())
+    crypto_scheduler = asyncio.create_task(reactor_scheduler())
     try:
         yield
     finally:
         scheduler.cancel()
         council_scheduler.cancel()
+        crypto_scheduler.cancel()
         try:
             await scheduler
+        except asyncio.CancelledError:
+            pass
+        try:
+            await crypto_scheduler
         except asyncio.CancelledError:
             pass
         try:
@@ -66,7 +74,7 @@ async def lifespan(app):
         except asyncio.CancelledError:
             pass
 
-app = FastAPI(title="AI Business Growth Engine API", version="0.3.1", lifespan=lifespan)
+app = FastAPI(title="AI Business Growth Engine API", version="0.4.0", lifespan=lifespan)
 app.add_middleware(CORSMiddleware, allow_origins=os.getenv("CORS_ORIGINS", "http://localhost:8000,http://127.0.0.1:8000").split(","), allow_credentials=False, allow_methods=["GET", "POST", "PUT", "PATCH", "OPTIONS"], allow_headers=["Content-Type", "Authorization"])
 
 class ProspectInput(BaseModel):
@@ -120,6 +128,27 @@ BUSINESS = Operations()
 app.include_router(business_router(BUSINESS, require_api_token))
 BRAIN = Brain(run_slot=RUN_SLOT)
 app.include_router(brain_router(BRAIN, require_api_token, lambda: BUSINESS.overview()))
+REACTOR = Reactor(model_slot=RUN_SLOT)
+app.include_router(reactor_router(REACTOR, require_api_token))
+
+
+def publish_crypto_review(run):
+    BRAIN.ingest(Observation(source="crypto", reference="reactor-"+run["id"],
+        observed_at=datetime.now(timezone.utc), summary=run["summary"][:2500],
+        details={"mode": "paper_only", "run_id": run["id"], "real_revenue": False,
+                 "board": run["board"], "paper_result": run["paper_result"]}), "internal_paper_research")
+
+
+REACTOR.on_complete = publish_crypto_review
+
+
+async def reactor_scheduler():
+    while True:
+        try:
+            await asyncio.to_thread(REACTOR.tick)
+        except Exception:
+            logging.getLogger(__name__).error("Reactor scheduling unavailable; no external orders or paid retries.")
+        await asyncio.sleep(60)
 
 
 async def brain_scheduler():
@@ -162,7 +191,7 @@ async def business_scheduler():
 
 @app.get("/api/health")
 def health():
-    return {"status":"ok","service":"growth-engine-api","version":"0.3.1","brain_version":"1.0","brain_agents":24,"business_operations":True,"business_bootstrap_loaded":BUSINESS_BOOTSTRAP["loaded"],"live_run_events":True,"ai_configured":bool(os.getenv("AI_API_KEY") or os.getenv("ANTHROPIC_API_KEY")),"api_token_configured":bool(os.getenv("APP_API_TOKEN")),"google_places_configured":bool(os.getenv("BUSINESS_DATA_API_KEY") or os.getenv("GOOGLE_MAPS_API_KEY")),"agent_count":len(AGENTS),"persistence":str(DATA_PATH)}
+    return {"status":"ok","service":"growth-engine-api","version":"0.4.0","reactor_version":"1.0","reactor_agents":8,"reactor_live_orders":False,"brain_version":"1.0","brain_agents":24,"business_operations":True,"business_bootstrap_loaded":BUSINESS_BOOTSTRAP["loaded"],"live_run_events":True,"ai_configured":bool(os.getenv("AI_API_KEY") or os.getenv("ANTHROPIC_API_KEY")),"api_token_configured":bool(os.getenv("APP_API_TOKEN")),"google_places_configured":bool(os.getenv("BUSINESS_DATA_API_KEY") or os.getenv("GOOGLE_MAPS_API_KEY")),"agent_count":len(AGENTS),"persistence":str(DATA_PATH)}
 
 @app.get("/api/agents")
 def list_agents():
