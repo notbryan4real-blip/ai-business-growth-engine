@@ -60,7 +60,7 @@ class Strict(BaseModel):
 
 
 class Observation(Strict):
-    source: Literal["gmail", "instagram", "calendar", "business", "owner", "system"]
+    source: Literal["gmail", "instagram", "calendar", "business", "owner", "system", "crypto"]
     reference: str = Field(min_length=3, max_length=200)
     observed_at: datetime
     summary: str = Field(min_length=1, max_length=2500)
@@ -201,6 +201,8 @@ class Brain:
             selected.append("social")
         if "business" in sources:
             selected.append("project")
+        if "crypto" in sources:
+            selected.append("finance")
         if "calendar" in sources or any(m.get("due_at") for m in memory):
             selected.append("calendar")
         if not selected:
@@ -321,6 +323,12 @@ class Brain:
                 proposals.append({"key": "deadline:" + memory["id"], "owner": "calendar", "title": memory["text"],
                                   "details": "Owner-recorded commitment due " + memory["due_at"], "evidence_ids": [memory["id"]], "priority": 95})
         portfolio = next((o for o in m["evidence"] if o["source"] == "business" and not o["stale"]), None)
+        crypto = next((o for o in m["evidence"] if o["source"] == "crypto" and not o["stale"]), None)
+        if crypto:
+            proposals.append({"key": "crypto:review", "owner": "finance", "title": "Review crypto paper research and data gaps",
+                              "details": crypto["summary"] + " Paper P&L is not business revenue or proof of future returns.",
+                              "evidence_ids": [crypto["id"]], "priority": 45,
+                              "evidence_digest": hashlib.sha256(crypto["reference"].encode()).hexdigest()})
         if portfolio:
             for task in portfolio.get("details", {}).get("tasks", [])[:3]:
                 if isinstance(task, dict) and task.get("status") == "open" and isinstance(task.get("title"), str):

@@ -71,7 +71,8 @@ def test_startup_bootstrap_and_operations_are_available_without_exposing_private
     monkeypatch.setenv("BUSINESS_BOOTSTRAP_JSON", raw)
     with TestClient(application.app) as client:
         health = client.get("/api/health").json()
-        assert health["business_bootstrap_loaded"] and health["version"] == "0.3.1"
+        assert health["business_bootstrap_loaded"] and health["version"] == "0.4.0"
+        assert health["reactor_agents"] == 8 and health["reactor_live_orders"] is False
         assert "private observation" not in json.dumps(health)
         assert client.get("/api/business/overview").status_code == 401
         assert engine.overview()["projects"][0]["snapshot"]["summary"] == "private observation"

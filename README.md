@@ -1,5 +1,15 @@
 # AI Business Growth Engine
 
+## Crypto Reactor
+
+**[Open Crypto Reactor](https://ai-business-growth-engine-api.onrender.com/reactor.html)**
+adds five event strategy scorers, an eight-stage research ring, optional eight
+model workers plus an Opus board, real public market reads, paper accounting,
+event-time replay, risk controls and reports into the JARVIS council. Defaults
+use no model credits. It shares the existing backend and private token. There
+is no live-order capability or guaranteed-return target. See
+[the research guide](docs/crypto-reactor.md) for data gaps, costs and storage limits.
+
 A phone-first, approval-gated workflow for qualifying local-business prospects, generating focused offers, and tracking sales opportunities.
 
 ## Live dashboard
