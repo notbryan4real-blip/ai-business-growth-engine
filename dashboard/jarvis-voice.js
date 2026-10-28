@@ -1,0 +1,7 @@
+/* Optional local speech presentation. No actor voice cloning, no API secrets. */
+(()=>{'use strict';const synth=window.speechSynthesis;if(!synth)return;
+const button=document.createElement('button');button.type='button';button.textContent='◉ JARVIS voice';button.setAttribute('aria-label','Hear JARVIS status');button.style.cssText='position:fixed;right:14px;bottom:18px;z-index:10000;padding:12px 17px;border-radius:24px;background:rgba(9,34,59,.92);border:1px solid #6deaff;color:#dff9ff;box-shadow:0 0 24px #23b9ff33;cursor:pointer';
+const message=()=>{const el=document.getElementById('status');const status=el?.textContent?.trim()||'The command interface is ready.';return 'Good evening. JARVIS at your service. '+status.slice(0,180)};
+button.addEventListener('click',()=>{if(synth.speaking){synth.cancel();button.textContent='◉ JARVIS voice';return;}const utter=new SpeechSynthesisUtterance(message());utter.lang='en-GB';utter.rate=.93;utter.pitch=.88;const voices=synth.getVoices();utter.voice=voices.find(v=>v.lang.toLowerCase()==='en-gb'&&/male|daniel|george|ryan/i.test(v.name))||voices.find(v=>v.lang.toLowerCase()==='en-gb')||null;utter.onend=()=>button.textContent='◉ JARVIS voice';utter.onerror=()=>button.textContent='◉ JARVIS voice';button.textContent='■ Stop JARVIS';synth.speak(utter)});
+document.addEventListener('DOMContentLoaded',()=>document.body.appendChild(button));
+})();
