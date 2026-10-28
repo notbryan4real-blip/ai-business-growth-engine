@@ -99,6 +99,33 @@ button{transition:background .2s,box-shadow .2s,transform .2s}
 button:hover{box-shadow:0 0 22px rgba(88,181,255,.22);transform:translateY(-1px)}
 #scene{filter:saturate(.86) hue-rotate(4deg)}
 @media(max-width:760px){.panel{border-radius:15px!important;backdrop-filter:blur(18px)}.top{backdrop-filter:blur(14px)}}
+</style><style id="mobile-command-v2">
+:root{--ink:#eaf6ff;--panel:rgba(221,240,255,.83);--edge:rgba(89,149,200,.28);--white:#102c4d;--muted:#456883;--cyan:#087ebc;--blue:#2379e2}
+html,body{background:#dceeff!important;color:#173653!important}
+body:before{opacity:.38}
+body:after{background:linear-gradient(155deg,rgba(255,255,255,.72),rgba(176,214,250,.28) 54%,rgba(230,244,255,.76))!important}
+.top{background:rgba(238,249,255,.83)!important;border-bottom:1px solid rgba(97,157,203,.25)!important;box-shadow:0 3px 22px rgba(28,82,127,.08)}
+.panel{background:rgba(245,251,255,.82)!important;border:1px solid rgba(122,174,211,.34)!important;color:#173653!important;box-shadow:0 12px 40px rgba(35,99,151,.11),inset 0 1px white!important}
+.panelhead,.label,.tiny,.eyebrow{color:#315c80!important}
+.brand,.agentname{color:#13385e!important;text-shadow:none!important}
+#scene{filter:saturate(.9) brightness(1.17)!important}
+.command-dock{position:fixed;z-index:9;bottom:max(12px,env(safe-area-inset-bottom));left:50%;transform:translateX(-50%);display:flex;gap:5px;padding:7px;background:rgba(245,251,255,.94);border:1px solid rgba(101,160,208,.35);border-radius:22px;box-shadow:0 12px 42px rgba(20,72,120,.19);backdrop-filter:blur(24px);max-width:calc(100vw - 20px)}
+.command-dock a,.command-dock button{border:0;background:transparent;color:#285778;text-decoration:none;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:3px;min-width:57px;min-height:49px;padding:5px 8px;font:600 10px system-ui;border-radius:15px;white-space:nowrap}
+.command-dock a.active,.command-dock button.active{background:#d5ecff;color:#086ca8}
+.command-dock .dock-icon{font-size:21px;line-height:1}
+.mobile-view-button{display:none}
+@media(max-width:760px){
+.top{height:67px!important;padding:10px 15px!important}.brand h1{font-size:16px!important}.topright .clock{display:none!important}.sys small{display:none!important}
+.panel.left,.panel.right{top:78px!important;bottom:auto!important;max-height:calc(100dvh - 175px)!important;width:calc(100vw - 28px)!important;left:14px!important;right:auto!important;overflow-y:auto!important;padding:15px!important}
+.panel.left{display:none!important}.panel.right{display:none!important}
+body[data-mobile-view="status"] .panel.left{display:block!important}
+body[data-mobile-view="agents"] .panel.right{display:block!important}
+body[data-mobile-view="brain"] .panel.left{display:block!important}
+#scene{inset:66px 0 76px!important}
+.stream-panel,.live-controls{z-index:8!important;left:12px!important;right:12px!important;top:76px!important;bottom:82px!important;width:auto!important;max-height:calc(100dvh - 164px)!important;overflow:auto!important}
+.hud{pointer-events:none!important}.hud .panel,.hud .top{pointer-events:auto!important}
+.command-dock{width:max-content}
+}
 </style></head><body><div id="loading" class="load"><div><strong>GROWTH ENGINE</strong>INITIALIZING HOLOGRAPHIC CORE<em>ESTABLISHING 3D NEURAL MESH...</em></div></div><div id="scene"></div>
 <div class="hud"><div class="top"><div class="brand"><div class="reactor"></div><div><div class="eyebrow">Autonomous business intelligence</div><h1>GROWTH <span>ENGINE</span> / 01</h1></div></div><div class="topright"><div class="sys"><span id="systemStatus">● LIVE AGENT WORKSPACE</span><small>CONNECT YOUR BACKEND TO RUN</small></div><div class="clock" id="clock">CORE ONLINE</div></div></div>
 <div class="panel left"><div class="panelhead"><span>◈ SYSTEM TELEMETRY</span><span class="tiny">SYS.01</span></div><div class="readout"><div class="stat"><b id="agentcount">19</b><span>AGENT NODES</span></div><div class="stat"><b id="packets">000</b><span>DATA TRANSFERS</span></div><div class="stat"><b id="phase">01</b><span>PIPELINE STAGE</span></div><div class="stat"><b id="picked">CEO</b><span>SELECTED NODE</span></div></div><div class="section"><div class="label">Run progress</div><div class="meterrow"><span id="progressText">No active run</span></div><div class="meter"><i id="progressBar" style="width:0%"></i></div><p id="liveStatus" role="status" aria-live="polite">Ready to connect.</p><a href="reactor.html" style="color:var(--cyan)">Crypto Reactor</a> · <a href="jarvis.html" style="color:var(--cyan)">JARVIS</a> · <a href="business.html" style="color:var(--cyan)">Business operations</a> · <a href="index.html" style="color:var(--cyan)">Sales</a></div><div class="section"><div class="label">Workflow sequence</div><div class="steps"><div id="s0" class="step active">01<br>INGEST</div><div id="s1" class="step">02<br>ANALYZE</div><div id="s2" class="step">03<br>VERIFY</div><div id="s3" class="step">04<br>APPROVE</div></div></div></div>
@@ -174,4 +201,4 @@ const clock=new THREE.Clock();function animate(){requestAnimationFrame(animate);
 function resize(){camera.aspect=innerWidth/innerHeight;camera.fov=innerWidth<760?56:42;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight);renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,1.6));}
 window.addEventListener('resize',resize);resize();inspect(0);document.getElementById('loading').classList.add('hide');animate();document.getElementById('clock').textContent='CORE '+new Date().toISOString().slice(11,19)+'Z';setInterval(()=>{document.getElementById('clock').textContent='CORE '+new Date().toISOString().slice(11,19)+'Z';},1000);
 }catch(e){console.error(e);document.getElementById('loading').classList.add('hide');document.getElementById('desc').textContent='3D unavailable. Live runs, reports, and event data remain available.';}
-</script><script type="module" src="swarm-live.js?v=0.2.1"></script></body></html>
+</script><script type="module" src="swarm-live.js?v=0.2.1"></script><nav class="command-dock" aria-label="Primary navigation"><button type="button" data-view="orbit" class="active"><span class="dock-icon">◉</span>Orbit</button><button type="button" data-view="status"><span class="dock-icon">▤</span>Status</button><button type="button" data-view="agents"><span class="dock-icon">⬡</span>Agents</button><a href="jarvis.html"><span class="dock-icon">◈</span>JARVIS</a><a href="index.html"><span class="dock-icon">⌂</span>Business</a></nav><script>document.body.dataset.mobileView='orbit';document.querySelectorAll('[data-view]').forEach(b=>b.addEventListener('click',()=>{document.body.dataset.mobileView=b.dataset.view;document.querySelectorAll('[data-view]').forEach(x=>x.classList.toggle('active',x===b));}));</script></body></html>
