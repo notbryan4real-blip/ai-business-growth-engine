@@ -23,6 +23,7 @@ from fastapi import APIRouter, Header, HTTPException
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
 from agents import runtime
+from brain.insights import run_metrics, select_memory
 
 
 def now():
@@ -81,7 +82,7 @@ class Observation(Strict):
 
 
 class Memory(Strict):
-    kind: Literal["goal", "preference", "commitment", "fact"]
+    kind: Literal["goal", "preference", "commitment", "fact", "procedure"]
     text: str = Field(min_length=3, max_length=1500)
     source: str = Field(min_length=3, max_length=250)
     due_at: datetime | None = None
@@ -112,10 +113,15 @@ class Settings(Strict):
         return value
 
 
-class Meeting(Strict):
+class MeetingPreview(Strict):
+    mode: Literal["rules", "ai"] = "ai"
+    agenda: str = Field(default="Review important changes, goals, deadlines and business priorities.", min_length=3, max_length=2000)
+
+
+class Meeting(MeetingPreview):
     request_id: str = Field(min_length=8, max_length=150)
     mode: Literal["rules", "ai"] = "rules"
-    agenda: str = Field(default="Review important changes, goals, deadlines and business priorities.", min_length=3, max_length=2000)
+    max_model_calls: int | None = Field(default=None, ge=1, le=6)
 
 
 class Decision(Strict):
@@ -218,7 +224,11 @@ class Brain:
         observed = self.evidence(s)
         from brain.connectors import configured_sources
         return {"settings": s["settings"], "hierarchy": hierarchy(), "observations": observed,
-                "memory": s["memory"], "tasks": s["tasks"], "decisions": s["decisions"][-60:],
+                "performance": {**run_metrics(s["meetings"]),
+                                "pending_owner_decisions": sum(d["status"] == "proposed" for d in s["decisions"])},
+                "memory": s["memory"], "tasks": s["tasks"],
+                "decisions": [d for index, d in enumerate(s["decisions"])
+                              if d["status"] == "proposed" or index >= len(s["decisions"]) - 60],
                 "meetings": [self.summary(m) for m in s["meetings"][-30:]][::-1],
                 "connector_runs": s["connector_runs"], "connectors_configured": configured_sources(),
                 "model_calls_reserved_today": s["budget"].get(local.date().isoformat(), 0),
@@ -250,9 +260,43 @@ class Brain:
             return fn(m, s)
         return self.transact(change)
 
+    def context(self, s, request, timestamp):
+        evidence = self.evidence(s, timestamp)
+        memory = (select_memory(s["memory"], request.agenda, timestamp)
+                  if request.mode == "ai" else s["memory"][:])
+        participants = self.participants(evidence, s["memory"])
+        return evidence, memory, participants
+
+    def preview(self, request, portfolio=None, at=None):
+        timestamp = at or now()
+        s = self.transact(lambda s: s)
+        if portfolio:
+            # Match the real start route without storing a preview observation.
+            s["observations"].append({**portfolio.model_dump(mode="json"), "id": "preview-business",
+                                      "provenance": "internal_state", "imported_at": stamp(timestamp)})
+        evidence, memory, participants = self.context(s, request, timestamp)
+        day = timestamp.astimezone(ZoneInfo(s["settings"]["timezone"])).date().isoformat()
+        required = len(participants) if request.mode == "ai" else 0
+        remaining = max(0, s["settings"]["daily_model_call_limit"] - s["budget"].get(day, 0))
+        configured = bool(os.getenv("AI_API_KEY") or os.getenv("ANTHROPIC_API_KEY"))
+        blockers = []
+        if required and not configured:
+            blockers.append("The model provider is not configured. Rules meetings remain available.")
+        if required > remaining:
+            blockers.append("The planned run exceeds today's remaining council call allowance.")
+        return {"mode": request.mode, "agenda": request.agenda, "participants": participants,
+                "model_calls_required": required, "model_calls_remaining": remaining,
+                "can_start": not blockers, "blockers": blockers,
+                "memory": memory, "memory_omitted": len(s["memory"]) - len(memory),
+                "fresh_sources": [o["source"] for o in evidence if not o["stale"]],
+                "stale_sources": [o["source"] for o in evidence if o["stale"]],
+                "missing_sources": [name for name in ("gmail", "instagram", "calendar", "business", "crypto")
+                                    if not any(o["source"] == name for o in evidence)],
+                "external_execution": False, "cost_usd": None, "previewed_at": stamp(timestamp)}
+
     def start(self, request, at=None):
         timestamp = at or now()
-        payload = request.model_dump()
+        payload = request.model_dump(exclude_none=True)
         meeting_id = uuid.uuid4().hex
         reserved = False
         def create(s):
@@ -267,10 +311,11 @@ class Brain:
                 if not completed:
                     raise HTTPException(409, "Export meeting history before adding more meetings.")
                 s["meetings"].remove(completed)
-            evidence = self.evidence(s, timestamp)
-            participants = self.participants(evidence, s["memory"])
+            evidence, memory, participants = self.context(s, request, timestamp)
             day = timestamp.astimezone(ZoneInfo(s["settings"]["timezone"])).date().isoformat()
             if request.mode == "ai":
+                if request.max_model_calls is not None and len(participants) > request.max_model_calls:
+                    raise HTTPException(409, "The run now needs more calls than you reviewed. Preview it again.")
                 if not (os.getenv("AI_API_KEY") or os.getenv("ANTHROPIC_API_KEY")):
                     raise HTTPException(503, "The model provider is not configured. Rules meetings remain available.")
                 if s["budget"].get(day, 0) + len(participants) > s["settings"]["daily_model_call_limit"]:
@@ -282,7 +327,10 @@ class Brain:
                 s["budget"] = dict(sorted(s["budget"].items())[-35:])
             m = {"id": meeting_id, "request_id": request.request_id, "request": payload,
                  "mode": request.mode, "agenda": request.agenda, "status": "queued", "created_at": stamp(timestamp),
-                 "participants": participants, "evidence": evidence, "memory": s["memory"][-30:],
+                 "participants": participants, "evidence": evidence, "memory": memory,
+                 "memory_selection": {"method": "keyword_and_priority" if request.mode == "ai" else "all_owner_records",
+                                      "selected_ids": [m["id"] for m in memory],
+                                      "omitted_count": len(s["memory"]) - len(memory)},
                  "owner_decisions": [{k: d[k] for k in ("action", "status", "owner_note") if k in d}
                                      for d in s["decisions"] if d["status"] in {"accepted", "done"}][-15:],
                  "task_state": [{k: t[k] for k in ("title", "status", "note") if k in t} for t in s["tasks"][-20:]],
@@ -379,13 +427,18 @@ class Brain:
                 evidence["observations"] = [{"source": o["source"], "id": o["id"], "observed_at": o["observed_at"],
                                                "provenance": o["provenance"], "summary": o["summary"][:1000]}
                                               for o in evidence["observations"]]
-                evidence["owner_memory"] = [{"kind": m["kind"], "text": m["text"][:600], "source": m["source"][:100], "due_at": m.get("due_at")}
-                                            for m in evidence["owner_memory"][-10:]]
+                evidence["owner_memory"] = [{"id": m["id"], "kind": m["kind"], "text": m["text"][:600],
+                                             "source": m["source"][:100], "verified_by": m["verified_by"], "due_at": m.get("due_at")}
+                                            for m in evidence["owner_memory"][:10]]
                 evidence["owner_decisions"] = [{"action": d["action"][:400], "status": d["status"], "owner_note": d.get("owner_note", "")[:200]}
                                                for d in evidence["owner_decisions"][-5:]]
                 evidence["previous_task_state"] = [{"title": t["title"][:200], "status": t["status"], "note": t.get("note", "")[:160]}
                                                    for t in evidence["previous_task_state"][-10:]]
                 evidence["context_is_abbreviated"] = True
+            self.update_meeting(meeting_id, lambda m, s: m.update(context_summary={
+                "memory_ids": [item["id"] for item in evidence["owner_memory"]],
+                "evidence_ids": [item["id"] for item in evidence["observations"]],
+                "abbreviated": evidence.get("context_is_abbreviated", False)}))
             for agent_id in meeting["participants"]:
                 if self.meeting(meeting_id).get("cancel_requested"):
                     self.update_meeting(meeting_id, lambda m, s: m.update(status="cancelled", completed_at=stamp()))
@@ -448,6 +501,16 @@ class Brain:
 def router(brain, authorize, business_overview=None):
     api = APIRouter(prefix="/api/brain")
 
+    def portfolio_observation():
+        if not business_overview:
+            return None
+        state = business_overview()
+        current = now()
+        return Observation(source="business", reference="portfolio-" + current.strftime("%Y%m%d%H%M%S%f"),
+            observed_at=current, summary="Current internal business task queue; imported business evidence keeps its original provenance and timestamps.",
+            details={"tasks": [{k: t[k] for k in ("id", "title", "priority", "status") if k in t}
+                               for t in state["tasks"] if t["status"] == "open"][:20], "money": state["money"]})
+
     @api.get("/overview")
     def overview(authorization: str | None = Header(default=None)):
         authorize(authorization)
@@ -473,16 +536,17 @@ def router(brain, authorize, business_overview=None):
         authorize(authorization)
         return brain.transact(lambda s: s.update(settings=request.model_dump()) or s["settings"])
 
+    @api.post("/meetings/preview")
+    def preview(request: MeetingPreview, authorization: str | None = Header(default=None)):
+        authorize(authorization)
+        return brain.preview(request, portfolio_observation())
+
     @api.post("/meetings", status_code=202)
     def start(request: Meeting, authorization: str | None = Header(default=None)):
         authorize(authorization)
-        if business_overview:
-            state = business_overview()
-            current = now()
-            brain.ingest(Observation(source="business", reference="portfolio-" + current.strftime("%Y%m%d%H%M%S%f"),
-                observed_at=current, summary="Current internal business task queue; imported business evidence keeps its original provenance and timestamps.",
-                details={"tasks": [{k: t[k] for k in ("id", "title", "priority", "status") if k in t} for t in state["tasks"] if t["status"] == "open"][:20],
-                         "money": state["money"]}), "internal_state")
+        portfolio = portfolio_observation()
+        if portfolio:
+            brain.ingest(portfolio, "internal_state")
         return brain.start(request)
 
     @api.get("/meetings/{meeting_id}")

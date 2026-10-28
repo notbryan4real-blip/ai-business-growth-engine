@@ -1,5 +1,11 @@
 # Architecture
 
+The JARVIS council uses the existing specialist hierarchy, owner memory, approval
+records and bounded call budget. Its agenda-based context retrieval, run previews,
+measured health panel and browser speech controls are documented in
+[JARVIS personal control](personal-brain.md). These are application-level additions;
+no new agent framework or paid infrastructure is required.
+
 ## Initial flow
 
 1. Discovery adapters retrieve candidate businesses.

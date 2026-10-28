@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"><meta name="theme-color" content="#03070c"><title>GROWTH ENGINE // Holographic Command Interface</title>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"><meta name="theme-color" content="#03070c"><title>GROWTH ENGINE // Glass Command Center</title>
 <style>
 :root{--cyan:#57f3ff;--blue:#388dff;--amber:#ffc66e;--green:#5dffb0;--violet:#b59cff;--ink:#03070c;--panel:rgba(4,13,24,.78);--edge:rgba(87,243,255,.26);--muted:#6c8a9f;--white:#e5fbff}
 *{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:var(--ink);color:var(--white);font:12px/1.4 ui-monospace,SFMono-Regular,Consolas,monospace}body:before{content:"";position:fixed;inset:0;z-index:1;pointer-events:none;background:linear-gradient(rgba(87,243,255,.022) 1px,transparent 1px),linear-gradient(90deg,rgba(87,243,255,.022) 1px,transparent 1px);background-size:44px 44px;mask-image:linear-gradient(transparent,#000 10%,#000 80%,transparent)}#scene{position:fixed;inset:0;z-index:0}canvas{display:block;width:100%;height:100%}
@@ -83,7 +83,50 @@
 @media(max-width:760px){.stream-panel{bottom:55px;max-height:30vh;padding:7px}.stream-log{max-height:calc(30vh - 50px)}.transfer{padding:5px}.transfer-head,.transfer-route{font-size:7px}.transfer pre{font-size:6px;max-height:48px}.stream-title strong{font-size:8px}}
 .live-controls{z-index:9;left:50%;top:50%;transform:translate(-50%,-50%);width:min(430px,calc(100% - 24px));max-height:82vh;overflow:auto;padding:16px;clip-path:none;opacity:1;background:#06121e}.live-controls label{display:block;margin:9px 0 4px}.live-controls input,.live-controls textarea,.live-controls select{width:100%;min-height:38px;background:#071d2c;border:1px solid #245064;color:#e5fbff;padding:8px;font:12px system-ui}.live-controls textarea{height:70px}.live-controls button{margin:9px 4px 0 0}button:disabled{opacity:.45}#liveStatus{overflow-wrap:anywhere;color:var(--cyan);font-size:9px}#liveFormStatus{position:sticky;top:0;z-index:2;padding:10px;background:#102533;border-left:2px solid var(--cyan);color:var(--cyan);font:12px/1.5 system-ui;overflow-wrap:anywhere}#liveFormStatus:empty{display:none}#liveFormStatus[data-error="true"]{color:var(--amber);border-color:var(--amber)}</style>
 <script type="importmap">{"imports":{"three":"./vendor/three.module.js"}}</script>
-<link rel="stylesheet" href="stark-glass.css"></head><body><div id="loading" class="load"><div><strong>GROWTH ENGINE</strong>INITIALIZING HOLOGRAPHIC CORE<em>ESTABLISHING 3D NEURAL MESH...</em></div></div><div id="scene"></div>
+<style id="stark-glass-theme">
+:root{--cyan:#80eaff;--blue:#4b9dff;--amber:#eacfa4;--green:#72e5c7;--violet:#b3acff;--ink:#071527;--panel:rgba(19,44,75,.48);--edge:rgba(180,225,255,.27);--muted:#a4c0d6;--white:#f5fbff}
+html,body{background:radial-gradient(ellipse at 53% 38%,#193c63 0%,#0c203a 48%,#061324 100%);font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;letter-spacing:.015em}
+body:before{background:linear-gradient(rgba(150,211,255,.028) 1px,transparent 1px),linear-gradient(90deg,rgba(150,211,255,.028) 1px,transparent 1px);background-size:58px 58px}
+body:after{content:"";position:fixed;inset:0;pointer-events:none;z-index:1;background:radial-gradient(ellipse at 50% 42%,rgba(86,162,240,.11),transparent 55%),linear-gradient(130deg,rgba(156,213,255,.065),transparent 44%)}
+.top{background:linear-gradient(180deg,rgba(13,36,64,.74),rgba(13,36,64,.1));border-bottom:1px solid rgba(186,225,255,.17);backdrop-filter:blur(22px);-webkit-backdrop-filter:blur(22px)}
+.panel{background:linear-gradient(145deg,rgba(37,76,119,.58),rgba(10,29,54,.58))!important;border:1px solid rgba(181,223,255,.29)!important;box-shadow:0 20px 60px rgba(0,9,26,.3),inset 0 1px rgba(255,255,255,.15),0 0 30px rgba(82,162,255,.07)!important;backdrop-filter:blur(26px) saturate(1.4);-webkit-backdrop-filter:blur(26px) saturate(1.4);border-radius:20px!important}
+.panelhead{color:#f4fbff!important;border-bottom-color:rgba(185,225,255,.18)!important}
+.brand,.agentname{letter-spacing:.08em;text-shadow:0 0 25px rgba(105,202,255,.3)}
+.label,.eyebrow,.tiny{color:#b6cfe4!important}
+.stat,.readout,.section{border-color:rgba(176,221,255,.13)!important}
+button,input,select{border-radius:10px!important;font-family:inherit!important}
+button{transition:background .2s,box-shadow .2s,transform .2s}
+button:hover{box-shadow:0 0 22px rgba(88,181,255,.22);transform:translateY(-1px)}
+#scene{filter:saturate(.86) hue-rotate(4deg)}
+@media(max-width:760px){.panel{border-radius:15px!important;backdrop-filter:blur(18px)}.top{backdrop-filter:blur(14px)}}
+</style><style id="mobile-command-v2">
+:root{--ink:#eaf6ff;--panel:rgba(221,240,255,.83);--edge:rgba(89,149,200,.28);--white:#102c4d;--muted:#456883;--cyan:#087ebc;--blue:#2379e2}
+html,body{background:#dceeff!important;color:#173653!important}
+body:before{opacity:.38}
+body:after{background:linear-gradient(155deg,rgba(255,255,255,.72),rgba(176,214,250,.28) 54%,rgba(230,244,255,.76))!important}
+.top{background:rgba(238,249,255,.83)!important;border-bottom:1px solid rgba(97,157,203,.25)!important;box-shadow:0 3px 22px rgba(28,82,127,.08)}
+.panel{background:rgba(245,251,255,.82)!important;border:1px solid rgba(122,174,211,.34)!important;color:#173653!important;box-shadow:0 12px 40px rgba(35,99,151,.11),inset 0 1px white!important}
+.panelhead,.label,.tiny,.eyebrow{color:#315c80!important}
+.brand,.agentname{color:#13385e!important;text-shadow:none!important}
+#scene{filter:saturate(.9) brightness(1.17)!important}
+.command-dock{position:fixed;z-index:9;bottom:max(12px,env(safe-area-inset-bottom));left:50%;transform:translateX(-50%);display:flex;gap:5px;padding:7px;background:rgba(245,251,255,.94);border:1px solid rgba(101,160,208,.35);border-radius:22px;box-shadow:0 12px 42px rgba(20,72,120,.19);backdrop-filter:blur(24px);max-width:calc(100vw - 20px)}
+.command-dock a,.command-dock button{border:0;background:transparent;color:#285778;text-decoration:none;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:3px;min-width:57px;min-height:49px;padding:5px 8px;font:600 10px system-ui;border-radius:15px;white-space:nowrap}
+.command-dock a.active,.command-dock button.active{background:#d5ecff;color:#086ca8}
+.command-dock .dock-icon{font-size:21px;line-height:1}
+.mobile-view-button{display:none}
+@media(max-width:760px){
+.top{height:67px!important;padding:10px 15px!important}.brand h1{font-size:16px!important}.topright .clock{display:none!important}.sys small{display:none!important}
+.panel.left,.panel.right{top:78px!important;bottom:auto!important;max-height:calc(100dvh - 175px)!important;width:calc(100vw - 28px)!important;left:14px!important;right:auto!important;overflow-y:auto!important;padding:15px!important}
+.panel.left{display:none!important}.panel.right{display:none!important}
+body[data-mobile-view="status"] .panel.left{display:block!important}
+body[data-mobile-view="agents"] .panel.right{display:block!important}
+body[data-mobile-view="brain"] .panel.left{display:block!important}
+#scene{inset:66px 0 76px!important}
+.stream-panel,.live-controls{z-index:8!important;left:12px!important;right:12px!important;top:76px!important;bottom:82px!important;width:auto!important;max-height:calc(100dvh - 164px)!important;overflow:auto!important}
+.hud{pointer-events:none!important}.hud .panel,.hud .top{pointer-events:auto!important}
+.command-dock{width:max-content}
+}
+</style></head><body><div id="loading" class="load"><div><strong>GROWTH ENGINE</strong>INITIALIZING HOLOGRAPHIC CORE<em>ESTABLISHING 3D NEURAL MESH...</em></div></div><div id="scene"></div>
 <div class="hud"><div class="top"><div class="brand"><div class="reactor"></div><div><div class="eyebrow">Autonomous business intelligence</div><h1>GROWTH <span>ENGINE</span> / 01</h1></div></div><div class="topright"><div class="sys"><span id="systemStatus">● LIVE AGENT WORKSPACE</span><small>CONNECT YOUR BACKEND TO RUN</small></div><div class="clock" id="clock">CORE ONLINE</div></div></div>
 <div class="panel left"><div class="panelhead"><span>◈ SYSTEM TELEMETRY</span><span class="tiny">SYS.01</span></div><div class="readout"><div class="stat"><b id="agentcount">19</b><span>AGENT NODES</span></div><div class="stat"><b id="packets">000</b><span>DATA TRANSFERS</span></div><div class="stat"><b id="phase">01</b><span>PIPELINE STAGE</span></div><div class="stat"><b id="picked">CEO</b><span>SELECTED NODE</span></div></div><div class="section"><div class="label">Run progress</div><div class="meterrow"><span id="progressText">No active run</span></div><div class="meter"><i id="progressBar" style="width:0%"></i></div><p id="liveStatus" role="status" aria-live="polite">Ready to connect.</p><a href="reactor.html" style="color:var(--cyan)">Crypto Reactor</a> · <a href="jarvis.html" style="color:var(--cyan)">JARVIS</a> · <a href="business.html" style="color:var(--cyan)">Business operations</a> · <a href="index.html" style="color:var(--cyan)">Sales</a></div><div class="section"><div class="label">Workflow sequence</div><div class="steps"><div id="s0" class="step active">01<br>INGEST</div><div id="s1" class="step">02<br>ANALYZE</div><div id="s2" class="step">03<br>VERIFY</div><div id="s3" class="step">04<br>APPROVE</div></div></div></div>
 <div class="panel right"><div class="panelhead"><span>◈ NODE INSPECTOR</span><span class="tiny" id="nodeid">NODE 00</span></div><div class="tag" id="role">EXECUTIVE CORE</div><div class="agentname" id="name">Executive Orchestrator</div><div class="label">Functional profile</div><div class="desc" id="desc">Coordinates the business growth workflow and routes work between specialist agents.</div><div class="section"><div class="label">Live event stream</div><div class="feed" id="feed"><div class="feedline"><i class="dot"></i><span>Holographic network initialized.</span></div><div class="feedline"><i class="dot"></i><span>19 specialist nodes mapped.</span></div><div class="feedline"><i class="dot"></i><span>Awaiting a live run.</span></div></div></div><div class="section"><div class="label">Interaction</div><div class="tiny">TAP A NODE TO INSPECT · DRAG TO ORBIT · PINCH TO ZOOM</div></div></div>
@@ -158,4 +201,4 @@ const clock=new THREE.Clock();function animate(){requestAnimationFrame(animate);
 function resize(){camera.aspect=innerWidth/innerHeight;camera.fov=innerWidth<760?56:42;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight);renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,1.6));}
 window.addEventListener('resize',resize);resize();inspect(0);document.getElementById('loading').classList.add('hide');animate();document.getElementById('clock').textContent='CORE '+new Date().toISOString().slice(11,19)+'Z';setInterval(()=>{document.getElementById('clock').textContent='CORE '+new Date().toISOString().slice(11,19)+'Z';},1000);
 }catch(e){console.error(e);document.getElementById('loading').classList.add('hide');document.getElementById('desc').textContent='3D unavailable. Live runs, reports, and event data remain available.';}
-</script><script type="module" src="swarm-live.js?v=0.2.1"></script></body></html>
+</script><script type="module" src="swarm-live.js?v=0.2.1"></script><nav class="command-dock" aria-label="Primary navigation"><button type="button" data-view="orbit" class="active"><span class="dock-icon">◉</span>Orbit</button><button type="button" data-view="status"><span class="dock-icon">▤</span>Status</button><button type="button" data-view="agents"><span class="dock-icon">⬡</span>Agents</button><a href="jarvis.html"><span class="dock-icon">◈</span>JARVIS</a><a href="index.html"><span class="dock-icon">⌂</span>Business</a></nav><script>document.body.dataset.mobileView='orbit';document.querySelectorAll('[data-view]').forEach(b=>b.addEventListener('click',()=>{document.body.dataset.mobileView=b.dataset.view;document.querySelectorAll('[data-view]').forEach(x=>x.classList.toggle('active',x===b));}));</script></body></html>

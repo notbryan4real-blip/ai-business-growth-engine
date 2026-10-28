@@ -35,6 +35,9 @@ jobs:
         env:
           PYTHONPATH: .
         run: python -c "import app; print(app.app.title)"
+      - name: Test JARVIS browser controls
+        # Node's built-in runner needs no npm install or new application dependencies.
+        run: node --test tests/jarvis-*.test.cjs
       - name: Check dashboard JavaScript syntax
         run: |
           python - <<'PY'

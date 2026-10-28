@@ -1,0 +1,8 @@
+/* Shared mobile-first light glass design system */
+:root{color-scheme:light!important;--bg:#e2f1ff!important;--background:#e2f1ff!important;--surface:#f4faff!important;--panel:#f4faff!important;--panel2:#e6f3ff!important;--text:#163a5c!important;--muted:#52718d!important;--line:#b5d6ed!important;--border:#b5d6ed!important;--cyan:#167ebc!important;--accent:#167ebc!important;--green:#148c83!important}
+html{background:#ddecfa!important}body{background:radial-gradient(ellipse at 12% 5%,#fff 0%,#e8f5ff 42%,#d5eafb 100%)!important;color:#173a5d!important;font-family:Inter,system-ui,-apple-system,"Segoe UI",sans-serif!important}
+.panel,.card,.tile,.stat,.metric,.widget,.section-card,.item,.surface{background:rgba(251,254,255,.78)!important;border:1px solid rgba(119,170,210,.34)!important;box-shadow:0 12px 35px rgba(35,98,151,.09)!important;backdrop-filter:blur(16px);border-radius:18px!important;color:#173a5d!important}
+header{background:rgba(242,250,255,.7)!important;border-bottom-color:#bad8ed!important}h1,h2,h3,h4,strong{color:#173a5d}p,small,label{color:inherit}
+input,textarea,select{background:#f8fcff!important;color:#163a5c!important;border:1px solid #b8d7ec!important;border-radius:12px!important;max-width:100%}
+button{border-radius:12px!important;min-height:42px;touch-action:manipulation}a{color:#176ca5}nav{flex-wrap:wrap;gap:10px}
+@media(max-width:600px){body{overflow-x:hidden}.shell,main,.container{max-width:100%;padding-left:13px!important;padding-right:13px!important}.panel,.card,.tile{padding:14px!important}h1{font-size:clamp(27px,8vw,40px)!important}header{gap:10px}nav{font-size:12px}button,input,select,textarea{font-size:16px}section{min-width:0}}

@@ -6,6 +6,100 @@ authenticated `/api/brain/*` routes. It uses the existing Swarm token. The origi
 catalog to 24. These are separately prompted model calls, not 24 independently
 trained neural networks or human-level general intelligence.
 
+## Context, run previews and council health
+
+On your phone, connect with your existing Swarm token and open **Council**.
+**Preview AI council** shows the selected specialists, QA and chief, fresh/stale/
+missing sources, retrieved owner memory, and the planned model-call count. The
+preview makes no model call, reserves no budget and stores no imported observation.
+Choose **Start reviewed AI run** to proceed. Agenda changes invalidate the preview.
+The server checks the daily limit again and rejects a run if it now needs more
+calls than the reviewed maximum. A preview is not a provider-credit check, a dollar
+quote, or a reservation of the shared execution slot. Rules planning remains the
+default; existing automatic-AI settings retain their separate daily limit.
+
+`POST /api/brain/meetings/preview` accepts `mode` (`ai` or `rules`) and `agenda`.
+It uses the same portfolio snapshot adapter and participant selection as starting
+a meeting. The existing start route accepts an optional `max_model_calls` (1–6).
+Both routes require the owner bearer token. The optional field preserves old API
+clients and saved idempotency records. Call-count approval does not authorize any
+external action; this council continues to produce recommendations only.
+
+In **Memory**, save a **Reviewed lesson / procedure** after checking it yourself,
+or search saved goals, preferences, facts and commitments. AI meetings retrieve
+up to 30 records within 14,000 serialized characters: due/overdue commitments first,
+then agenda keyword overlap, then goals/preferences, with recency breaking ties.
+Record IDs, source and owner verification are retained. This is local keyword
+retrieval, not vector similarity or a trained memory model. Rules meetings consider
+all saved commitments so older deadlines are not hidden by a last-30 cutoff.
+
+Every meeting records its selected memory IDs and omitted count. AI meetings also
+record the actual memory/evidence IDs passed to the provider. The existing combined
+input limit may further shorten context; the most relevant selected memories are
+kept first, and the meeting view identifies abbreviation. No AI output is promoted
+into owner memory automatically. Existing meetings serve as recorded episodes;
+reviewed procedures are owner-authored records, not autonomous model retraining.
+
+The **Council health** panel on Today summarizes retained runs (at most 120),
+separating rules and AI. It shows completed AI runs out of terminal AI runs, model
+calls attempted, mean elapsed time for completed AI runs with valid timestamps,
+and all pending owner decisions. Pending decisions remain available for review even
+when they are older than the latest 60 decision records. Queued/running runs are excluded from the
+completion denominator; failed, canceled and interrupted runs are included. Elapsed
+time includes queue time. Missing timing is omitted, not counted as zero. Completing
+a run does not prove its recommendations were correct or that revenue was earned.
+Provider dollar spending and tool-call accuracy are unmeasured and remain null in
+the API; call counts must not be treated as a bill. This is retained-history health,
+not lifetime analytics.
+
+These additions use the existing FastAPI/SQLite implementation. They do not
+provision a vector database, framework, hosted monitoring service, model provider,
+MCP/A2A integration or paid infrastructure. The existing specialist hierarchy,
+approval records, source freshness rules and bounded model calls remain the basis
+of the system. The swarm's 3D scene and current shared glass design are preserved.
+
+## Agenda dictation and briefing readout
+
+The current page has **Dictate agenda**, **Read briefing**, **Stop audio**, and a
+typed agenda field. Dictation fills text only; **Run briefing** explicitly starts
+the existing rules meeting with zero model calls. AI runs use the separate council
+preview. This is not open-ended conversational voice control or actor voice cloning.
+No backend personality change is part of this upgrade.
+
+Readout speaks the selected meeting summary, or the latest briefing when no meeting
+is selected, with a 4,000-character cap. It prefers a default British English voice,
+then another British English voice, then default English, then another English
+voice. Otherwise it requests the browser default with `en-GB`. The chosen name and
+language or fallback are shown; voice names do not reliably identify gender and
+British speech is not guaranteed. Matching normalizes language-tag case and
+underscore separators. Voice lists refresh on `voiceschanged` and every tap.
+Loading voices never starts speech automatically.
+
+The controls explain unavailable APIs and playback/microphone failures, and keep
+their accessible labels aligned with the action. Stop cancels queued speech and
+discards late dictation results; older callbacks cannot reset a newer session.
+Dictation and playback interrupt one another to avoid speaking into the microphone.
+No microphone request occurs on page load. Browser/OS speech services can be local
+or remote, so offline processing and device voice availability are not guaranteed.
+
+Validation commands:
+
+```sh
+PYTHONPATH=. python -m pytest -q
+node --test tests/jarvis-*.test.cjs
+node --check dashboard/jarvis.js
+node --check dashboard/jarvis-voice.js
+```
+
+Tests use a simulated provider, DOM and speech engine. They cover relevant older
+memory, deadlines, bounded context, private/read-only previews, changed call counts,
+legacy request IDs, truthful metrics, preview confirmation/races, voice selection,
+late voices, playback errors, and stale recognition callbacks. They do not establish
+production model credit, Android audio quality, TalkBack behavior, or visual layout.
+Before deploying, check Android portrait layout, preview → cancel/start, dictation
+permission errors, readout with/without British voices, immediate stop/restart, and
+TalkBack action/feedback announcements. Verify the existing 3D swarm still opens.
+
 ## Responsibility and communication
 
 - Ryan sets goals, records preferences and reviews decisions.
