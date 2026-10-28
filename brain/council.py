@@ -151,13 +151,16 @@ class Brain:
     @staticmethod
     def initial():
         return {"schema_version": 1, "settings": Settings().model_dump(), "observations": [],
-                "memory": [], "meetings": [], "tasks": [], "decisions": [], "connector_runs": {}, "budget": {}}
+                "memory": [], "meetings": [], "tasks": [], "decisions": [], "connector_runs": {}, "budget": {}, "missions": []}
 
     def recover(self):
         def change(s):
             for meeting in s["meetings"]:
                 if meeting["status"] in {"queued", "running"}:
                     meeting.update(status="interrupted", error="Service restarted. Partial reports retained; model calls will not replay.")
+            for mission in s.get("missions", []):
+                if mission["status"] == "starting":
+                    mission.update(status="interrupted", error="Service restarted during mission start. Inspect the record; no work was replayed.")
         self.transact(change)
 
     def ingest(self, request, provenance="owner_import"):
@@ -294,7 +297,7 @@ class Brain:
                                     if not any(o["source"] == name for o in evidence)],
                 "external_execution": False, "cost_usd": None, "previewed_at": stamp(timestamp)}
 
-    def start(self, request, at=None):
+    def start(self, request, at=None, guard=None):
         timestamp = at or now()
         payload = request.model_dump(exclude_none=True)
         meeting_id = uuid.uuid4().hex
@@ -306,8 +309,13 @@ class Brain:
                 if old["request"] != payload:
                     raise HTTPException(409, "Meeting request ID already used for different work.")
                 return old, False
+            if guard:
+                guard(s)
             if len(s["meetings"]) >= 120:
-                completed = next((m for m in s["meetings"] if m["status"] not in {"queued", "running"}), None)
+                # An unfinished owner review must not lose its execution record.
+                pinned = {"mission-" + m["id"] for m in s.get("missions", []) if not m.get("review")}
+                completed = next((m for m in s["meetings"] if m["status"] not in {"queued", "running"}
+                                  and m["request_id"] not in pinned), None)
                 if not completed:
                     raise HTTPException(409, "Export meeting history before adding more meetings.")
                 s["meetings"].remove(completed)
@@ -510,6 +518,9 @@ def router(brain, authorize, business_overview=None):
             observed_at=current, summary="Current internal business task queue; imported business evidence keeps its original provenance and timestamps.",
             details={"tasks": [{k: t[k] for k in ("id", "title", "priority", "status") if k in t}
                                for t in state["tasks"] if t["status"] == "open"][:20], "money": state["money"]})
+
+    from brain.missions import router as mission_router
+    api.include_router(mission_router(brain, authorize, portfolio_observation))
 
     @api.get("/overview")
     def overview(authorization: str | None = Header(default=None)):

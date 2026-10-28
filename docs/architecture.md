@@ -6,6 +6,11 @@ measured health panel and browser speech controls are documented in
 [JARVIS personal control](personal-brain.md). These are application-level additions;
 no new agent framework or paid infrastructure is required.
 
+[Goal workflows](agentic-workflows.md) add saved missions over that council:
+context → reviewed start → real execution → owner review → optional checked
+lesson. The guide maps each part to the agentic implementation reference and
+identifies the components that are still absent.
+
 ## Initial flow
 
 1. Discovery adapters retrieve candidate businesses.

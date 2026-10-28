@@ -6,6 +6,10 @@ authenticated `/api/brain/*` routes. It uses the existing Swarm token. The origi
 catalog to 24. These are separately prompted model calls, not 24 independently
 trained neural networks or human-level general intelligence.
 
+The **Missions** tab now keeps a goal, reviewed plan, council execution and owner
+feedback together. See [goal workflows and the implementation-guide mapping](agentic-workflows.md)
+for the Android flow, checkpoint behavior, limits and remaining architecture gaps.
+
 ## Context, run previews and council health
 
 On your phone, connect with your existing Swarm token and open **Council**.
