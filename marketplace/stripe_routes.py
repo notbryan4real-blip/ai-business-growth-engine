@@ -28,6 +28,8 @@ def list_listings():
 
 @router.post("/checkout/{listing_id}")
 def create_checkout(listing_id: str):
+    if os.getenv("MARKETPLACE_ENABLE_CHECKOUT") != "true":
+        raise HTTPException(503, "Checkout disabled until production readiness is verified")
     if not stripe.api_key or not BASE_URL.startswith("https://"):
         raise HTTPException(503, "Stripe marketplace is not configured")
     item = LISTINGS.get(listing_id)
