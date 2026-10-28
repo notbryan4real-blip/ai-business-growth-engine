@@ -12,7 +12,7 @@ async function request(path,options={}){const token=$('token').value.trim();if(!
 async function action(fn){if(busy)return;busy=true;try{await fn();}catch(e){showStatus(e.message,true);}finally{busy=false;}}
 function tab(id){document.querySelectorAll('[role=tabpanel]').forEach(n=>n.hidden=n.id!==id);document.querySelectorAll('[role=tab]').forEach(n=>n.setAttribute('aria-selected',String(n.dataset.tab===id)));}
 document.querySelectorAll('[data-tab]').forEach(n=>n.onclick=()=>tab(n.dataset.tab));
-async function load(){state=await request('/overview');render();}
+async function load(){state=await request('/overview');render();if(typeof missionConnected==='function')missionConnected();}
 function render(){
  $('sourceCount').textContent=state.observations.filter(o=>!o.stale).length;$('taskCount').textContent=state.tasks.filter(t=>t.status==='open').length;$('decisionCount').textContent=state.decisions.filter(d=>d.status==='proposed').length;$('budget').textContent=state.model_calls_reserved_today+' / '+state.settings.daily_model_call_limit;
  const options={timeZone:state.settings.timezone,hour:'numeric',minute:'2-digit',timeZoneName:'short'};
