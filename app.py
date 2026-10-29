@@ -19,6 +19,7 @@ from business.operations import Operations, router as business_router, iso
 from integrations.shopify_business import sync_greenify
 from brain.council import Brain, Observation, router as brain_router
 from reactor.service import Reactor, router as reactor_router
+from marketplace.stripe_routes import router as marketplace_router
 
 DATA_PATH = Path(os.getenv("GROWTH_ENGINE_DATA_PATH", "data/runtime_store.json"))
 LOCK = Lock()
@@ -130,6 +131,7 @@ BRAIN = Brain(run_slot=RUN_SLOT)
 app.include_router(brain_router(BRAIN, require_api_token, lambda: BUSINESS.overview()))
 REACTOR = Reactor(model_slot=RUN_SLOT)
 app.include_router(reactor_router(REACTOR, require_api_token))
+app.include_router(marketplace_router)
 
 
 def publish_crypto_review(run):
