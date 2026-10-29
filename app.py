@@ -17,6 +17,7 @@ from agents.prospecting.google_places import PlacesDiscoveryError, search_places
 from agents.audit.website import WebsiteAuditError, audit_website
 from business.operations import Operations, router as business_router, iso
 from integrations.shopify_business import sync_greenify
+from integrations.stripe_checkout import router as stripe_router
 from brain.council import Brain, Observation, router as brain_router
 from reactor.service import Reactor, router as reactor_router
 
@@ -75,6 +76,7 @@ async def lifespan(app):
             pass
 
 app = FastAPI(title="AI Business Growth Engine API", version="0.4.0", lifespan=lifespan)
+app.include_router(stripe_router)
 app.add_middleware(CORSMiddleware, allow_origins=os.getenv("CORS_ORIGINS", "http://localhost:8000,http://127.0.0.1:8000").split(","), allow_credentials=False, allow_methods=["GET", "POST", "PUT", "PATCH", "OPTIONS"], allow_headers=["Content-Type", "Authorization"])
 
 class ProspectInput(BaseModel):
