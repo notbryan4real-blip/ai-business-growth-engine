@@ -139,7 +139,9 @@ def _call_groq(agent: dict[str, str], payload: dict[str, Any], prior: list[dict[
     req = urllib.request.Request(
         "https://api.groq.com/openai/v1/chat/completions",
         data=json.dumps(body).encode("utf-8"),
-        headers={"Content-Type": "application/json", "Authorization": f"Bearer {key}"},
+        headers={"Content-Type": "application/json", "Authorization": f"Bearer {key}",
+                 "Accept": "application/json",
+                 "User-Agent": "AI-Business-Growth-Engine/1.0 (Groq API client)"},
         method="POST",
     )
     try:
