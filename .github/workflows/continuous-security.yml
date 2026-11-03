@@ -1,0 +1,47 @@
+name: Continuous security audit
+on:
+  push:
+    branches: [main]
+  pull_request:
+  schedule:
+    - cron: '17 */6 * * *'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  security:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install audit tools
+        run: python -m pip install pip-audit bandit
+      - name: Audit Python dependencies
+        run: python -m pip_audit -r requirements.txt
+      - name: Static security review
+        run: bandit -r app.py agents business brain reactor integrations -ll -q
+      - name: Check tracked files for credential-like assignments
+        shell: bash
+        run: |
+          python - <<'PY'
+          import pathlib, re, subprocess, sys
+          files = subprocess.check_output(['git','ls-files','-z']).decode().split('\0')
+          pattern = re.compile(r'(?i)(?:api[_-]?key|secret[_-]?key|access[_-]?token|private[_-]?key)\s*[:=]\s*["\x27]([^"\x27]+)')
+          findings = []
+          for name in files:
+              if not name or pathlib.Path(name).suffix not in {'.py','.js','.ts','.json','.yaml','.yml','.env','.html'}:
+                  continue
+              try: lines = pathlib.Path(name).read_text(errors='replace').splitlines()
+              except OSError: continue
+              for i,line in enumerate(lines,1):
+                  m = pattern.search(line)
+                  if m and not any(x in m.group(1).lower() for x in ('example','placeholder','your_','test_','dummy','changeme')):
+                      findings.append(f'{name}:{i}: possible credential')
+          print('\n'.join(findings) if findings else 'No obvious credential assignments detected')
+          sys.exit(bool(findings))
+          PY
