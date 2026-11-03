@@ -116,6 +116,66 @@ def _call_anthropic(agent: dict[str, str], payload: dict[str, Any], prior: list[
     return parsed, model
 
 
+def _call_groq(agent: dict[str, str], payload: dict[str, Any], prior: list[dict[str, Any]]) -> tuple[dict[str, Any], str]:
+    key = os.getenv("GROQ_API_KEY")
+    if not key:
+        raise AgentRuntimeError("GROQ_API_KEY is not configured on the server.")
+    model = os.getenv("GROQ_MODEL", "llama-3.3-70b-versatile")
+    body = {
+        "model": model,
+        "max_tokens": 600,
+        "temperature": 0,
+        "messages": [
+            {"role": "system", "content": SYSTEM},
+            {"role": "user", "content": json.dumps({
+                "agent": agent,
+                "prospect_evidence": payload,
+                "prior_agent_outputs": prior,
+                "instruction": "Perform only your assigned specialist role. Return valid JSON matching the system schema.",
+            }, ensure_ascii=False)},
+        ],
+        "response_format": {"type": "json_object"},
+    }
+    req = urllib.request.Request(
+        "https://api.groq.com/openai/v1/chat/completions",
+        data=json.dumps(body).encode("utf-8"),
+        headers={"Content-Type": "application/json", "Authorization": f"Bearer {key}"},
+        method="POST",
+    )
+    try:
+        with urllib.request.urlopen(req, timeout=45) as response:
+            data = json.loads(response.read().decode("utf-8"))
+    except urllib.error.HTTPError as exc:
+        detail = exc.read().decode("utf-8", errors="replace")[:500]
+        raise AgentRuntimeError(f"Groq returned HTTP {exc.code}: {detail}") from exc
+    except (urllib.error.URLError, TimeoutError) as exc:
+        raise AgentRuntimeError(f"Groq request failed: {exc}") from exc
+    try:
+        raw = data["choices"][0]["message"]["content"]
+        parsed = json.loads(raw)
+    except (KeyError, IndexError, TypeError, json.JSONDecodeError) as exc:
+        raise AgentRuntimeError("Groq returned an invalid JSON response.") from exc
+    required = {"summary", "findings", "risks", "next_actions", "evidence_gaps", "confidence"}
+    if not isinstance(parsed, dict) or not required.issubset(parsed):
+        raise AgentRuntimeError("Groq response is missing required fields.")
+    if (not isinstance(parsed["summary"], str)
+        or parsed["confidence"] not in ("low", "medium", "high")
+        or any(not isinstance(parsed[field], list)
+               or any(not isinstance(item, str) for item in parsed[field])
+               for field in ("findings", "risks", "next_actions", "evidence_gaps"))):
+        raise AgentRuntimeError("Groq response has invalid field types.")
+    return parsed, model
+
+
+def _call_provider(agent: dict[str, str], payload: dict[str, Any], prior: list[dict[str, Any]]) -> tuple[dict[str, Any], str]:
+    provider = os.getenv("AI_PROVIDER", "anthropic").lower()
+    if provider == "groq":
+        return _call_groq(agent, payload, prior)
+    if provider == "anthropic":
+        return _call_anthropic(agent, payload, prior)
+    raise AgentRuntimeError(f"Unsupported AI_PROVIDER: {provider}")
+
+
 def select_agents(agent_ids: list[str] | None) -> list[dict[str, str]]:
     selected_ids = list(dict.fromkeys([a["id"] for a in AGENTS] if agent_ids is None else agent_ids))
     unknown = set(selected_ids) - {a["id"] for a in AGENTS}
@@ -152,7 +212,7 @@ def run_specialists(prospect: dict[str, Any], agent_ids: list[str] | None = None
         emit({"type": "agent_started", "agent_id": agent["id"],
               "source_agent_id": results[-1]["agent_id"] if results else None,
               "name": agent["name"], "context": prior})
-        output, model = _call_anthropic(agent, prospect, prior)
+        output, model = _call_provider(agent, prospect, prior)
         result = {"agent_id": agent["id"], "name": agent["name"], "model": model, "output": output}
         results.append(result)
         emit({"type": "agent_completed", **result})
