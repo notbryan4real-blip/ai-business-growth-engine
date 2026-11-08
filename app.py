@@ -18,6 +18,7 @@ from agents.audit.website import WebsiteAuditError, audit_website
 from business.operations import Operations, router as business_router, iso
 from integrations.shopify_business import sync_greenify
 from brain.council import Brain, Observation, router as brain_router
+from brain.personal_api import router as personal_router
 from reactor.service import Reactor, router as reactor_router
 
 DATA_PATH = Path(os.getenv("GROWTH_ENGINE_DATA_PATH", "data/runtime_store.json"))
@@ -128,6 +129,7 @@ BUSINESS = Operations()
 app.include_router(business_router(BUSINESS, require_api_token))
 BRAIN = Brain(run_slot=RUN_SLOT)
 app.include_router(brain_router(BRAIN, require_api_token, lambda: BUSINESS.overview()))
+app.include_router(personal_router(require_api_token))
 REACTOR = Reactor(model_slot=RUN_SLOT)
 app.include_router(reactor_router(REACTOR, require_api_token))
 
