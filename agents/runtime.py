@@ -169,8 +169,58 @@ def _call_groq(agent: dict[str, str], payload: dict[str, Any], prior: list[dict[
     return parsed, model
 
 
+
+def _call_gemini(agent: dict[str, str], payload: dict[str, Any], prior: list[dict[str, Any]]) -> tuple[dict[str, Any], str]:
+    """Call Gemini with server-only API key; never log credentials or raw provider errors."""
+    key = os.getenv("GEMINI_API_KEY")
+    if not key:
+        raise AgentRuntimeError("GEMINI_API_KEY is not configured on the server.")
+    model = os.getenv("GEMINI_MODEL", "gemini-2.5-flash")
+    if not model.replace("-", "").replace(".", "").isalnum():
+        raise AgentRuntimeError("Invalid GEMINI_MODEL.")
+    body = {
+        "systemInstruction": {"parts": [{"text": SYSTEM}]},
+        "contents": [{"role": "user", "parts": [{"text": json.dumps({
+            "agent": agent, "prospect_evidence": payload,
+            "prior_agent_outputs": prior,
+            "instruction": "Perform your assigned specialist role using supplied evidence only.",
+        }, ensure_ascii=False)}]}],
+        "generationConfig": {"temperature": 0, "maxOutputTokens": 1200,
+                             "responseMimeType": "application/json"},
+    }
+    req = urllib.request.Request(
+        "https://generativelanguage.googleapis.com/v1beta/models/" + model + ":generateContent",
+        data=json.dumps(body).encode("utf-8"),
+        headers={"Content-Type": "application/json", "x-goog-api-key": key},
+        method="POST",
+    )
+    try:
+        with urllib.request.urlopen(req, timeout=45) as response:
+            data = json.loads(response.read().decode("utf-8"))
+    except urllib.error.HTTPError as exc:
+        raise AgentRuntimeError(f"Gemini request failed (HTTP {exc.code}); check key, quota and model.") from exc
+    except (urllib.error.URLError, TimeoutError) as exc:
+        raise AgentRuntimeError("Gemini request failed; check server connectivity.") from exc
+    try:
+        raw = "".join(p.get("text", "") for p in data["candidates"][0]["content"]["parts"])
+        parsed = json.loads(raw)
+    except (KeyError, IndexError, TypeError, json.JSONDecodeError) as exc:
+        raise AgentRuntimeError("Gemini returned an invalid structured response.") from exc
+    required = {"summary", "findings", "risks", "next_actions", "evidence_gaps", "confidence"}
+    if not isinstance(parsed, dict) or not required.issubset(parsed):
+        raise AgentRuntimeError("Gemini response missing required fields.")
+    if (not isinstance(parsed["summary"], str)
+        or parsed["confidence"] not in ("low", "medium", "high")
+        or any(not isinstance(parsed[k], list) or any(not isinstance(v, str) for v in parsed[k])
+               for k in ("findings", "risks", "next_actions", "evidence_gaps"))):
+        raise AgentRuntimeError("Gemini response has invalid field types.")
+    return parsed, model
+
+
 def _call_provider(agent: dict[str, str], payload: dict[str, Any], prior: list[dict[str, Any]]) -> tuple[dict[str, Any], str]:
     provider = os.getenv("AI_PROVIDER", "anthropic").lower()
+    if provider == "gemini":
+        return _call_gemini(agent, payload, prior)
     if provider == "groq":
         return _call_groq(agent, payload, prior)
     if provider == "anthropic":
